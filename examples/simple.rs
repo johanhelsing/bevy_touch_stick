@@ -53,7 +53,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         TouchStickBundle::new(TouchStickNode::<MyStick> {
             border_image: asset_server.load("outline.png"),
             knob_image: asset_server.load("knob.png"),
-            knob_size: Vec2::new(80., 80.),
+            knob_size: Vec2::splat(80.),
             dead_zone: 0.,
             behavior: TouchStickType::Floating,
             ..default()

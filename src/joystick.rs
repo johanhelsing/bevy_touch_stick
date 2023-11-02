@@ -94,9 +94,9 @@ pub struct TouchStickNode<S: Hash + Sync + Send + Clone + Default + Reflect + Fr
 pub struct TouchStickKnob {
     pub drag_id: Option<u64>,
     pub dead_zone: f32,
-    pub base_pos: Vec2,
-    pub start_pos: Vec2,
-    pub current_pos: Vec2,
+    pub base_position: Vec2,
+    pub start_position: Vec2,
+    pub current_position: Vec2,
     /// Value with maximum magnitude 1
     pub value: Vec2,
     pub interactable_zone: Rect,
@@ -205,10 +205,10 @@ pub fn extract_joystick_node<
                             (container_rect.center() - (uinode.size() / 2.)).extend(0.),
                         )
                     } else {
-                        data.start_pos.extend(0.)
+                        data.start_position.extend(0.)
                     }
                 }
-                TouchStickType::Dynamic => data.base_pos.extend(0.),
+                TouchStickType::Dynamic => data.base_position.extend(0.),
             };
 
             extracted_uinodes.uinodes.push(ExtractedUiNode {
@@ -243,10 +243,10 @@ pub fn extract_joystick_node<
                             (container_rect.center() - (uinode.size() / 2.)).extend(0.),
                         )
                     } else {
-                        (data.start_pos + pos).extend(0.)
+                        (data.start_position + pos).extend(0.)
                     }
                 }
-                TouchStickType::Dynamic => (data.base_pos + pos).extend(0.),
+                TouchStickType::Dynamic => (data.base_position + pos).extend(0.),
             };
 
             extracted_uinodes.uinodes.push(ExtractedUiNode {
