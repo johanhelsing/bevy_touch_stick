@@ -67,10 +67,11 @@ pub struct TouchStickBundle<
     pub(crate) computed_visibility: ComputedVisibility,
     /// Indicates the depth at which the node should appear in the UI
     pub(crate) z_index: ZIndex,
-    pub(crate) knob_data: TouchStickKnob,
+    pub(crate) knob_data: TouchStick,
     pub(crate) cursor_pos: RelativeCursorPosition,
 }
 
+/// bevy ui config for a stick
 #[derive(Component, Clone, Debug, Default, Reflect)]
 #[reflect(Component, Default)]
 pub struct TouchStickNode<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static>
@@ -89,9 +90,10 @@ pub struct TouchStickNode<S: Hash + Sync + Send + Clone + Default + Reflect + Fr
     pub behavior: TouchStickType,
 }
 
+/// pure data, independent of bevy_ui
 #[derive(Component, Clone, Debug, Default, Reflect)]
 #[reflect(Component, Default)]
-pub struct TouchStickKnob {
+pub struct TouchStick {
     pub drag_id: Option<u64>,
     pub dead_zone: f32,
     pub base_position: Vec2,
@@ -172,7 +174,7 @@ pub fn extract_joystick_node<
             &TintColor,
             &TouchStickNode<S>,
             &ComputedVisibility,
-            &TouchStickKnob,
+            &TouchStick,
         )>,
     >,
 ) {

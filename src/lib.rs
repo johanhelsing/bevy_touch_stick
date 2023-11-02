@@ -20,7 +20,7 @@ pub use crate::{
 };
 use crate::{
     input::{update_input, update_sticks, update_sticks_from_mouse, DragEvent},
-    joystick::{extract_joystick_node, TouchStickKnob},
+    joystick::{extract_joystick_node, TouchStick},
 };
 
 pub struct TouchStickPlugin<S> {
@@ -40,7 +40,7 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect 
         app.register_type::<TintColor>()
             .register_type::<TouchStickInteractionArea>()
             .register_type::<TouchStickNode<S>>()
-            .register_type::<TouchStickKnob>()
+            .register_type::<TouchStick>()
             .register_type::<TouchStickType>()
             .register_type::<TouchStickEventType>()
             .add_event::<TouchStickEvent<S>>()
@@ -71,7 +71,7 @@ fn joystick_image_node_system<
     S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static,
 >(
     interaction_area: Query<(&Node, With<TouchStickInteractionArea>)>,
-    mut joystick: Query<(&Transform, &TouchStickNode<S>, &mut TouchStickKnob)>,
+    mut joystick: Query<(&Transform, &TouchStickNode<S>, &mut TouchStick)>,
 ) {
     let interaction_area = interaction_area
         .iter()

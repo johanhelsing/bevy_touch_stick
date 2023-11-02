@@ -8,7 +8,7 @@ use bevy::{
 };
 
 use crate::{
-    joystick::TouchStickKnob, TouchStickEvent, TouchStickEventType, TouchStickNode, TouchStickType,
+    joystick::TouchStick, TouchStickEvent, TouchStickEventType, TouchStickNode, TouchStickType,
 };
 
 #[derive(Event)]
@@ -23,7 +23,7 @@ pub(crate) fn update_input<
 >(
     mut drag_events: EventReader<DragEvent>,
     mut stick_events: EventWriter<TouchStickEvent<S>>,
-    mut sticks: Query<(&TouchStickNode<S>, &mut TouchStickKnob)>,
+    mut sticks: Query<(&TouchStickNode<S>, &mut TouchStick)>,
 ) {
     let input_events = drag_events.iter().collect::<Vec<&DragEvent>>();
 
