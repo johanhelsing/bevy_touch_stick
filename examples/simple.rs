@@ -11,7 +11,7 @@ fn main() {
         .add_plugins(WorldInspectorPlugin::new())
         .add_plugins(VirtualJoystickPlugin::<String>::default())
         .add_systems(Startup, setup)
-        .add_systems(Update, update_joystick)
+        .add_systems(Update, (update_stick_color, move_player))
         .run();
 }
 
@@ -68,31 +68,38 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 }
 
-fn update_joystick(
+fn update_stick_color(
     mut stick_events: EventReader<VirtualJoystickEvent<String>>,
-    mut stick_colors: Query<(&mut TintColor, &VirtualJoystickNode<String>)>,
-    mut players: Query<(&mut Transform, &Player)>,
-    time: Res<Time>,
+    mut sticks: Query<(&mut TintColor, &VirtualJoystickNode<String>)>,
 ) {
-    let (mut player, player_data) = players.single_mut();
-
-    for stick in stick_events.iter() {
-        match stick.get_type() {
-            VirtualJoystickEventType::Press | VirtualJoystickEventType::Drag => {
-                let (mut color, node) = stick_colors.single_mut();
-                if node.id == stick.id() {
-                    *color = TintColor(Color::WHITE);
+    for event in stick_events.iter() {
+        for (mut color, node) in &mut sticks {
+            match event.get_type() {
+                VirtualJoystickEventType::Press | VirtualJoystickEventType::Drag => {
+                    if node.id == event.id() {
+                        *color = TintColor(Color::WHITE);
+                    }
                 }
-            }
-            VirtualJoystickEventType::Up => {
-                let (mut color, node) = stick_colors.single_mut();
-                if node.id == stick.id() {
-                    *color = TintColor(Color::WHITE.with_a(0.2));
+                VirtualJoystickEventType::Up => {
+                    if node.id == event.id() {
+                        *color = TintColor(Color::WHITE.with_a(0.2));
+                    }
                 }
             }
         }
+    }
+}
 
-        let move_delta = stick.value() * player_data.max_speed * time.delta_seconds();
-        player.translation += move_delta.extend(0.);
+fn move_player(
+    // todo: this should use a resource/component instead of events
+    mut stick_events: EventReader<VirtualJoystickEvent<String>>,
+    mut players: Query<(&mut Transform, &Player)>,
+    time: Res<Time>,
+) {
+    let (mut player_transform, player) = players.single_mut();
+
+    for event in stick_events.iter() {
+        let move_delta = event.value() * player.max_speed * time.delta_seconds();
+        player_transform.translation += move_delta.extend(0.);
     }
 }
