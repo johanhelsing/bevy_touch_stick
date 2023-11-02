@@ -1,13 +1,16 @@
-# bevy_virtual_stick
+# bevy_virtual_stick (work in progress)
 
 Create and use a virtual touch screen joystick for the
 [Bevy](https://bevyengine.org/) game engine.
 
-## Features
+## Goals
 
-- Supports mouse and touch
-- Simple stupid implementation
-- Multiple joysticks on screen (for e.g. twin stick)
+- [x] Support mouse and touch
+- [x] Multiple joysticks on screen (for e.g. twin stick)
+- [ ] Simple stupid implementation
+- [ ] Modular rendering
+- [ ] Integration with bevy (`Res<Input<TouchStick>>`)
+- [ ] Integration with leafwing input manager
 
 ## Examples
 
@@ -137,3 +140,7 @@ at your option.
 ## Contributions
 
 PRs welcome!
+
+## Acknowledgements
+
+`bevy_touch_stick` was forked from [`virtual_joystick`](https://github.com/SergioRibera/virtual_joystick)

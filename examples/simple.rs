@@ -1,43 +1,51 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-
-use virtual_joystick::*;
+use bevy_touch_stick::{
+    prelude::*, TintColor, VirtualJoystickEvent, VirtualJoystickEventType,
+    VirtualJoystickInteractionArea,
+};
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(WorldInspectorPlugin::new())
         .add_plugins(VirtualJoystickPlugin::<String>::default())
-        .add_systems(Startup, create_scene)
+        .add_systems(Startup, setup)
         .add_systems(Update, update_joystick)
         .run();
 }
 
 #[derive(Component)]
-// Player with velocity
-struct Player(pub f32);
+struct Player {
+    max_speed: f32,
+}
 
-fn create_scene(mut cmd: Commands, asset_server: Res<AssetServer>) {
-    cmd.spawn(Camera2dBundle {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.spawn(Camera2dBundle {
         transform: Transform::from_xyz(0., 0., 5.0),
         ..default()
     });
-    cmd.spawn(SpriteBundle {
-        transform: Transform {
-            translation: Vec3::new(0., 0., 0.),
+
+    commands.spawn((
+        SpriteBundle {
+            transform: Transform {
+                translation: Vec3::new(0., 0., 0.),
+                ..default()
+            },
+            texture: asset_server.load("knob.png"),
+            sprite: Sprite {
+                color: Color::PURPLE,
+                custom_size: Some(Vec2::new(50., 50.)),
+                ..default()
+            },
             ..default()
         },
-        texture: asset_server.load("knob.png"),
-        sprite: Sprite {
-            color: Color::PURPLE,
-            custom_size: Some(Vec2::new(50., 50.)),
-            ..default()
-        },
-        ..default()
-    })
-    .insert(Player(50.));
-    // Spawn Virtual Joystick at horizontal center
-    cmd.spawn(
+        Player { max_speed: 50. },
+    ));
+
+    // Spawn a stick at horizontal center
+    commands.spawn((
+        VirtualJoystickInteractionArea,
         VirtualJoystickBundle::new(VirtualJoystickNode {
             border_image: asset_server.load("outline.png"),
             knob_image: asset_server.load("knob.png"),
@@ -55,37 +63,36 @@ fn create_scene(mut cmd: Commands, asset_server: Res<AssetServer>) {
             bottom: Val::Percent(15.),
             ..default()
         }),
-    )
-    .insert(BackgroundColor(Color::ORANGE_RED.with_a(0.3)))
-    .insert(VirtualJoystickInteractionArea);
+        // Make it easy to see the area in which the stick can be interacted with
+        BackgroundColor(Color::ORANGE_RED.with_a(0.3)),
+    ));
 }
 
 fn update_joystick(
-    mut joystick: EventReader<VirtualJoystickEvent<String>>,
-    mut joystick_color: Query<(&mut TintColor, &VirtualJoystickNode<String>)>,
-    mut player: Query<(&mut Transform, &Player)>,
-    time_step: Res<FixedTime>,
+    mut stick_events: EventReader<VirtualJoystickEvent<String>>,
+    mut stick_colors: Query<(&mut TintColor, &VirtualJoystickNode<String>)>,
+    mut players: Query<(&mut Transform, &Player)>,
+    time: Res<Time>,
 ) {
-    let (mut player, player_data) = player.single_mut();
+    let (mut player, player_data) = players.single_mut();
 
-    for j in joystick.iter() {
-        let Vec2 { x, y } = j.value();
-        match j.get_type() {
+    for stick in stick_events.iter() {
+        match stick.get_type() {
             VirtualJoystickEventType::Press | VirtualJoystickEventType::Drag => {
-                let (mut color, node) = joystick_color.single_mut();
-                if node.id == j.id() {
+                let (mut color, node) = stick_colors.single_mut();
+                if node.id == stick.id() {
                     *color = TintColor(Color::WHITE);
                 }
             }
             VirtualJoystickEventType::Up => {
-                let (mut color, node) = joystick_color.single_mut();
-                if node.id == j.id() {
+                let (mut color, node) = stick_colors.single_mut();
+                if node.id == stick.id() {
                     *color = TintColor(Color::WHITE.with_a(0.2));
                 }
             }
         }
 
-        player.translation.x += x * player_data.0 * time_step.period.as_secs_f32();
-        player.translation.y += y * player_data.0 * time_step.period.as_secs_f32();
+        let move_delta = stick.value() * player_data.max_speed * time.delta_seconds();
+        player.translation += move_delta.extend(0.);
     }
 }

@@ -1,23 +1,31 @@
-use std::{hash::Hash, marker::PhantomData};
-
 use bevy::{
     prelude::*,
     reflect::TypePath,
     render::RenderApp,
     ui::{RenderUiSystem, UiSystem},
 };
+use std::{hash::Hash, marker::PhantomData};
 
 mod behaviour;
 mod input;
 mod joystick;
 
-pub use behaviour::VirtualJoystickType;
-use input::{update_input, update_joystick, update_joystick_by_mouse, DragEvent};
-pub use joystick::{
-    TintColor, VirtualJoystickBundle, VirtualJoystickInteractionArea, VirtualJoystickNode,
-};
+pub mod prelude {
+    pub use crate::{
+        VirtualJoystickBundle, VirtualJoystickNode, VirtualJoystickPlugin, VirtualJoystickType,
+    };
+}
 
-use joystick::{extract_joystick_node, VirtualJoystickKnob};
+pub use crate::{
+    behaviour::VirtualJoystickType,
+    joystick::{
+        TintColor, VirtualJoystickBundle, VirtualJoystickInteractionArea, VirtualJoystickNode,
+    },
+};
+use crate::{
+    input::{update_input, update_joystick, update_joystick_by_mouse, DragEvent},
+    joystick::{extract_joystick_node, VirtualJoystickKnob},
+};
 
 #[derive(Default)]
 pub struct VirtualJoystickPlugin<S> {
@@ -104,7 +112,7 @@ pub struct VirtualJoystickEvent<
 impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + 'static>
     VirtualJoystickEvent<S>
 {
-    /// Get ID of joystick throw event
+    /// Get Id of joystick throw event
     pub fn id(&self) -> S {
         self.id.clone()
     }

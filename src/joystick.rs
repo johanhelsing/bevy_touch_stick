@@ -35,6 +35,7 @@ impl From<Color> for TintColor {
     }
 }
 
+/// Marker component for a bevy_ui Node area where sticks can be interacted with.
 #[derive(Component, Copy, Clone, Debug, Default, Reflect)]
 #[reflect(Component, Default)]
 pub struct VirtualJoystickInteractionArea;
