@@ -49,7 +49,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             knob_size: Vec2::new(80., 80.),
             dead_zone: 0.,
             id: "UniqueJoystick".to_string(),
-            behaviour: TouchStickType::Floating,
+            behavior: TouchStickType::Floating,
         })
         .set_color(TintColor(Color::WHITE.with_a(0.2)))
         .set_style(Style {

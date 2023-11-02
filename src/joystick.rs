@@ -86,7 +86,7 @@ pub struct TouchStickNode<S: Hash + Sync + Send + Clone + Default + Reflect + Fr
     /// Zone to ignore movement
     pub dead_zone: f32,
     /// Define the behaviour of joystick
-    pub behaviour: TouchStickType,
+    pub behavior: TouchStickType,
 }
 
 #[derive(Component, Clone, Debug, Default, Reflect)]
@@ -186,7 +186,7 @@ pub fn extract_joystick_node<
                 || color.0.a() == 0.0
                 || !images.contains(&joystick_node.border_image)
                 || !images.contains(&joystick_node.knob_image)
-                || data.id_drag.is_none() && joystick_node.behaviour == TouchStickType::Dynamic
+                || data.id_drag.is_none() && joystick_node.behavior == TouchStickType::Dynamic
             {
                 continue;
             }
@@ -195,7 +195,7 @@ pub fn extract_joystick_node<
                 ..default()
             };
 
-            let border_pos = match joystick_node.behaviour {
+            let border_pos = match joystick_node.behavior {
                 TouchStickType::Fixed => global_transform
                     .compute_matrix()
                     .transform_point3((container_rect.center() - (uinode.size() / 2.)).extend(0.)),
@@ -233,7 +233,7 @@ pub fn extract_joystick_node<
             // ui is y down, so we flip
             let pos = Vec2::new(axis_value.x, -axis_value.y) * radius;
 
-            let knob_pos = match joystick_node.behaviour {
+            let knob_pos = match joystick_node.behavior {
                 TouchStickType::Fixed => global_transform.compute_matrix().transform_point3(
                     (container_rect.center() - (uinode.size() / 2.) + pos).extend(0.),
                 ),

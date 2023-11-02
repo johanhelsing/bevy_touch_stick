@@ -60,7 +60,7 @@ pub(crate) fn update_input<
                     }
                     knob.current_pos = *pos;
                     let half = knob.interactable_zone_rect.half_size();
-                    if node.behaviour == TouchStickType::Dynamic {
+                    if node.behavior == TouchStickType::Dynamic {
                         knob.base_pos = *pos;
                         let to_knob = knob.current_pos - knob.start_pos;
                         let distance_to_knob = to_knob.length();
