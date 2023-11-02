@@ -7,11 +7,13 @@ use bevy_touch_stick::{
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::BLACK))
-        .add_plugins(DefaultPlugins)
-        // Add an inspector for easily changing settings at runtime
-        .add_plugins(WorldInspectorPlugin::new())
-        // Add the plugin
-        .add_plugins(TouchStickPlugin::<String>::default())
+        .add_plugins((
+            DefaultPlugins,
+            // Add an inspector for easily changing settings at runtime
+            WorldInspectorPlugin::default(),
+            // Add the plugin
+            TouchStickPlugin::<String>::default(),
+        ))
         .add_systems(Startup, setup)
         .add_systems(Update, (update_stick_color, move_player))
         .run();
