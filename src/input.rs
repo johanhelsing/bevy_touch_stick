@@ -116,7 +116,7 @@ pub(crate) fn update_joystick(
 pub(crate) fn update_joystick_by_mouse(
     mouse_buttons: Res<Input<MouseButton>>,
     mut mouse_events: EventReader<MouseButtonInput>,
-    mut send_values: EventWriter<DragEvent>,
+    mut drag_events: EventWriter<DragEvent>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
     let window = windows.single();
@@ -124,15 +124,15 @@ pub(crate) fn update_joystick_by_mouse(
 
     for mouse_event in mouse_events.iter() {
         if mouse_event.button == MouseButton::Left && mouse_event.state == ButtonState::Released {
-            send_values.send(DragEvent::EndDrag { id: 0 });
+            drag_events.send(DragEvent::EndDrag { id: 0 });
         }
 
         if mouse_event.button == MouseButton::Left && mouse_event.state == ButtonState::Pressed {
-            send_values.send(DragEvent::StartDrag { id: 0, pos });
+            drag_events.send(DragEvent::StartDrag { id: 0, pos });
         }
     }
 
     if mouse_buttons.pressed(MouseButton::Left) {
-        send_values.send(DragEvent::Dragging { id: 0, pos });
+        drag_events.send(DragEvent::Dragging { id: 0, pos });
     }
 }
