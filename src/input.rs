@@ -120,15 +120,12 @@ pub fn update_joystick(
 
     for (id, phase, pos) in &touches {
         match phase {
-            // Start drag
             TouchPhase::Started => {
                 send_values.send(InputEvent::StartDrag { id: *id, pos: *pos });
             }
-            // Dragging
             TouchPhase::Moved => {
                 send_values.send(InputEvent::Dragging { id: *id, pos: *pos });
             }
-            // End drag
             TouchPhase::Ended | TouchPhase::Canceled => {
                 send_values.send(InputEvent::EndDrag { id: *id, pos: *pos });
             }
@@ -146,18 +143,15 @@ pub fn update_joystick_by_mouse(
     let pos = window.cursor_position().unwrap_or(Vec2::ZERO);
 
     for mousebtn in mousebtn_evr.iter() {
-        // End drag
         if mousebtn.button == MouseButton::Left && mousebtn.state == ButtonState::Released {
             send_values.send(InputEvent::EndDrag { id: 0, pos });
         }
 
-        // Start drag
         if mousebtn.button == MouseButton::Left && mousebtn.state == ButtonState::Pressed {
             send_values.send(InputEvent::StartDrag { id: 0, pos });
         }
     }
 
-    // Dragging
     if mouse_button_input.pressed(MouseButton::Left) {
         send_values.send(InputEvent::Dragging { id: 0, pos });
     }
