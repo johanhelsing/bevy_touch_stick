@@ -53,7 +53,7 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect 
             .add_systems(PreUpdate, update_input::<S>)
             .add_systems(
                 PostUpdate,
-                joystick_image_node_system::<S>.before(UiSystem::Layout),
+                map_input_zones_from_ui_nodes::<S>.before(UiSystem::Layout),
             );
 
         let render_app = match app.get_sub_app_mut(RenderApp) {
@@ -67,25 +67,26 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect 
     }
 }
 
-fn joystick_image_node_system<
+fn map_input_zones_from_ui_nodes<
     S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static,
 >(
-    interaction_area: Query<(&Node, With<TouchStickInteractionArea>)>,
-    mut joystick: Query<(&Transform, &TouchStickNode<S>, &mut TouchStick)>,
+    interaction_areas: Query<(&Node, With<TouchStickInteractionArea>)>,
+    mut sticks: Query<(&Transform, &TouchStickNode<S>, &mut TouchStick)>,
 ) {
-    let interaction_area = interaction_area
+    // todo: this looks like a giant hack
+    let interaction_areas = interaction_areas
         .iter()
         .map(|(node, _)| node.size())
         .collect::<Vec<Vec2>>();
 
-    for (i, (j_pos, data, mut knob)) in joystick.iter_mut().enumerate() {
-        let j_pos = j_pos.translation.truncate();
-        let Some(size) = interaction_area.get(i) else {
+    for (i, (stick_transform, stick_node, mut stick)) in sticks.iter_mut().enumerate() {
+        let j_pos = stick_transform.translation.truncate();
+        let Some(size) = interaction_areas.get(i) else {
             return;
         };
         let interaction_area = Rect::from_center_size(j_pos, *size);
-        knob.dead_zone = data.dead_zone;
-        knob.interactable_zone = interaction_area;
+        stick.dead_zone = stick_node.dead_zone;
+        stick.interactable_zone = interaction_area;
     }
 }
 
