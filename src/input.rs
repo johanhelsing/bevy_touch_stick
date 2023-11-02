@@ -134,25 +134,25 @@ pub fn update_joystick(
 }
 
 pub fn update_joystick_by_mouse(
-    mouse_button_input: Res<Input<MouseButton>>,
-    mut mousebtn_evr: EventReader<MouseButtonInput>,
+    mouse_buttons: Res<Input<MouseButton>>,
+    mut mouse_events: EventReader<MouseButtonInput>,
     mut send_values: EventWriter<InputEvent>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
     let window = windows.single();
     let pos = window.cursor_position().unwrap_or(Vec2::ZERO);
 
-    for mousebtn in mousebtn_evr.iter() {
-        if mousebtn.button == MouseButton::Left && mousebtn.state == ButtonState::Released {
+    for mouse_event in mouse_events.iter() {
+        if mouse_event.button == MouseButton::Left && mouse_event.state == ButtonState::Released {
             send_values.send(InputEvent::EndDrag { id: 0, pos });
         }
 
-        if mousebtn.button == MouseButton::Left && mousebtn.state == ButtonState::Pressed {
+        if mouse_event.button == MouseButton::Left && mouse_event.state == ButtonState::Pressed {
             send_values.send(InputEvent::StartDrag { id: 0, pos });
         }
     }
 
-    if mouse_button_input.pressed(MouseButton::Left) {
+    if mouse_buttons.pressed(MouseButton::Left) {
         send_values.send(InputEvent::Dragging { id: 0, pos });
     }
 }
