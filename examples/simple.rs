@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_touch_stick::{
-    prelude::*, TintColor, TouchStickEvent, TouchStickEventType, TouchStickInteractionArea,
-};
+use bevy_touch_stick::{prelude::*, TintColor, TouchStickEvent, TouchStickEventType};
 
 /// Marker type for our touch stick
 #[derive(Default, Reflect, Hash, Clone, PartialEq, Eq)]
@@ -48,8 +46,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // spawn a touch stick
     commands.spawn((
-        // required marker component
-        TouchStickInteractionArea,
         TouchStickBundle::new(TouchStickNode::<MyStick> {
             border_image: asset_server.load("outline.png"),
             knob_image: asset_server.load("knob.png"),

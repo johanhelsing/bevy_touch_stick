@@ -45,6 +45,8 @@ pub struct TouchStickInteractionArea;
 pub struct TouchStickBundle<
     S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static,
 > {
+    /// Indicates that this node may be interacted with
+    pub(crate) interaction_area: TouchStickInteractionArea,
     /// Describes the size of the node
     pub(crate) node: Node,
     /// Describes the style including flexbox settings
