@@ -6,7 +6,7 @@ use bevy::{
 };
 use std::{hash::Hash, marker::PhantomData};
 
-mod behaviour;
+mod behavior;
 mod input;
 mod joystick;
 
@@ -15,7 +15,7 @@ pub mod prelude {
 }
 
 pub use crate::{
-    behaviour::TouchStickType,
+    behavior::TouchStickType,
     joystick::{TintColor, TouchStickBundle, TouchStickInteractionArea, TouchStickNode},
 };
 use crate::{
