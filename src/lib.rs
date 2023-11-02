@@ -12,7 +12,7 @@ mod input;
 mod joystick;
 
 pub use behaviour::VirtualJoystickType;
-use input::{run_if_pc, update_input, update_joystick, update_joystick_by_mouse, InputEvent};
+use input::{run_if_pc, update_input, update_joystick, update_joystick_by_mouse, DragEvent};
 pub use joystick::{
     TintColor, VirtualJoystickBundle, VirtualJoystickInteractionArea, VirtualJoystickNode,
 };
@@ -35,7 +35,7 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect 
             .register_type::<VirtualJoystickType>()
             .register_type::<VirtualJoystickEventType>()
             .add_event::<VirtualJoystickEvent<S>>()
-            .add_event::<InputEvent>()
+            .add_event::<DragEvent>()
             .add_systems(
                 PreUpdate,
                 update_joystick

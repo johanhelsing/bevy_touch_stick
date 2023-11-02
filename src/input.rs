@@ -13,7 +13,7 @@ use crate::{
 };
 
 #[derive(Event)]
-pub enum InputEvent {
+pub enum DragEvent {
     StartDrag { id: u64, pos: Vec2 },
     Dragging { id: u64, pos: Vec2 },
     EndDrag { id: u64, pos: Vec2 },
@@ -33,16 +33,16 @@ fn is_some_and<T>(opt: Option<T>, cb: impl FnOnce(T) -> bool) -> bool {
 pub fn update_input<
     S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect + 'static,
 >(
-    mut input_events: EventReader<InputEvent>,
+    mut input_events: EventReader<DragEvent>,
     mut send_values: EventWriter<VirtualJoystickEvent<S>>,
     mut joysticks: Query<(&VirtualJoystickNode<S>, &mut VirtualJoystickKnob)>,
 ) {
-    let input_events = input_events.iter().collect::<Vec<&InputEvent>>();
+    let input_events = input_events.iter().collect::<Vec<&DragEvent>>();
 
     for (node, mut knob) in joysticks.iter_mut() {
         for event in &input_events {
             match event {
-                InputEvent::StartDrag { id, pos } => {
+                DragEvent::StartDrag { id, pos } => {
                     if knob.interactable_zone_rect.contains(*pos) && knob.id_drag.is_none()
                         || is_some_and(knob.id_drag, |i| i != *id)
                             && knob.interactable_zone_rect.contains(*pos)
@@ -58,7 +58,7 @@ pub fn update_input<
                         });
                     }
                 }
-                InputEvent::Dragging { id, pos } => {
+                DragEvent::Dragging { id, pos } => {
                     if !is_some_and(knob.id_drag, |i| i == *id) {
                         continue;
                     }
@@ -78,7 +78,7 @@ pub fn update_input<
                     // input events are y positive down, so we flip it
                     knob.value = Vec2::new(d.x, -d.y) / length.max(1.);
                 }
-                InputEvent::EndDrag { id, pos: _ } => {
+                DragEvent::EndDrag { id, pos: _ } => {
                     if !is_some_and(knob.id_drag, |i| i == *id) {
                         continue;
                     }
@@ -111,7 +111,7 @@ pub fn update_input<
 
 pub fn update_joystick(
     mut touch_events: EventReader<TouchInput>,
-    mut send_values: EventWriter<InputEvent>,
+    mut send_values: EventWriter<DragEvent>,
 ) {
     let touches = touch_events
         .iter()
@@ -121,13 +121,13 @@ pub fn update_joystick(
     for (id, phase, pos) in &touches {
         match phase {
             TouchPhase::Started => {
-                send_values.send(InputEvent::StartDrag { id: *id, pos: *pos });
+                send_values.send(DragEvent::StartDrag { id: *id, pos: *pos });
             }
             TouchPhase::Moved => {
-                send_values.send(InputEvent::Dragging { id: *id, pos: *pos });
+                send_values.send(DragEvent::Dragging { id: *id, pos: *pos });
             }
             TouchPhase::Ended | TouchPhase::Canceled => {
-                send_values.send(InputEvent::EndDrag { id: *id, pos: *pos });
+                send_values.send(DragEvent::EndDrag { id: *id, pos: *pos });
             }
         }
     }
@@ -136,7 +136,7 @@ pub fn update_joystick(
 pub fn update_joystick_by_mouse(
     mouse_buttons: Res<Input<MouseButton>>,
     mut mouse_events: EventReader<MouseButtonInput>,
-    mut send_values: EventWriter<InputEvent>,
+    mut send_values: EventWriter<DragEvent>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
     let window = windows.single();
@@ -144,15 +144,15 @@ pub fn update_joystick_by_mouse(
 
     for mouse_event in mouse_events.iter() {
         if mouse_event.button == MouseButton::Left && mouse_event.state == ButtonState::Released {
-            send_values.send(InputEvent::EndDrag { id: 0, pos });
+            send_values.send(DragEvent::EndDrag { id: 0, pos });
         }
 
         if mouse_event.button == MouseButton::Left && mouse_event.state == ButtonState::Pressed {
-            send_values.send(InputEvent::StartDrag { id: 0, pos });
+            send_values.send(DragEvent::StartDrag { id: 0, pos });
         }
     }
 
     if mouse_buttons.pressed(MouseButton::Left) {
-        send_values.send(InputEvent::Dragging { id: 0, pos });
+        send_values.send(DragEvent::Dragging { id: 0, pos });
     }
 }
