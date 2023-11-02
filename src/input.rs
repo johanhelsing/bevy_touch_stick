@@ -19,10 +19,6 @@ pub(crate) enum DragEvent {
     EndDrag { id: u64 },
 }
 
-pub fn run_if_pc() -> bool {
-    !["android", "ios"].contains(&std::env::consts::OS)
-}
-
 fn is_some_and<T>(opt: Option<T>, cb: impl FnOnce(T) -> bool) -> bool {
     if let Some(v) = opt {
         return cb(v);
