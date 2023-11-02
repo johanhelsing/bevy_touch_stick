@@ -13,10 +13,10 @@ use crate::{
 };
 
 #[derive(Event)]
-pub enum DragEvent {
+pub(crate) enum DragEvent {
     StartDrag { id: u64, pos: Vec2 },
     Dragging { id: u64, pos: Vec2 },
-    EndDrag { id: u64, pos: Vec2 },
+    EndDrag { id: u64 },
 }
 
 pub fn run_if_pc() -> bool {
@@ -30,7 +30,7 @@ fn is_some_and<T>(opt: Option<T>, cb: impl FnOnce(T) -> bool) -> bool {
     false
 }
 
-pub fn update_input<
+pub(crate) fn update_input<
     S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect + 'static,
 >(
     mut input_events: EventReader<DragEvent>,
@@ -78,7 +78,7 @@ pub fn update_input<
                     // input events are y positive down, so we flip it
                     knob.value = Vec2::new(d.x, -d.y) / length.max(1.);
                 }
-                DragEvent::EndDrag { id, pos: _ } => {
+                DragEvent::EndDrag { id } => {
                     if !is_some_and(knob.id_drag, |i| i == *id) {
                         continue;
                     }
@@ -109,7 +109,7 @@ pub fn update_input<
     }
 }
 
-pub fn update_joystick(
+pub(crate) fn update_joystick(
     mut touch_events: EventReader<TouchInput>,
     mut send_values: EventWriter<DragEvent>,
 ) {
@@ -127,13 +127,13 @@ pub fn update_joystick(
                 send_values.send(DragEvent::Dragging { id: *id, pos: *pos });
             }
             TouchPhase::Ended | TouchPhase::Canceled => {
-                send_values.send(DragEvent::EndDrag { id: *id, pos: *pos });
+                send_values.send(DragEvent::EndDrag { id: *id });
             }
         }
     }
 }
 
-pub fn update_joystick_by_mouse(
+pub(crate) fn update_joystick_by_mouse(
     mouse_buttons: Res<Input<MouseButton>>,
     mut mouse_events: EventReader<MouseButtonInput>,
     mut send_values: EventWriter<DragEvent>,
@@ -144,7 +144,7 @@ pub fn update_joystick_by_mouse(
 
     for mouse_event in mouse_events.iter() {
         if mouse_event.button == MouseButton::Left && mouse_event.state == ButtonState::Released {
-            send_values.send(DragEvent::EndDrag { id: 0, pos });
+            send_values.send(DragEvent::EndDrag { id: 0 });
         }
 
         if mouse_event.button == MouseButton::Left && mouse_event.state == ButtonState::Pressed {
