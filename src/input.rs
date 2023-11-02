@@ -18,14 +18,6 @@ pub(crate) enum DragEvent {
     EndDrag { id: u64 },
 }
 
-fn is_some_and<T>(opt: Option<T>, cb: impl FnOnce(T) -> bool) -> bool {
-    if let Some(v) = opt {
-        cb(v)
-    } else {
-        false
-    }
-}
-
 pub(crate) fn update_input<
     S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect + 'static,
 >(
@@ -51,10 +43,7 @@ pub(crate) fn update_input<
                         });
                     }
                 }
-                DragEvent::Dragging { id, pos } => {
-                    if !is_some_and(knob.drag_id, |i| i == *id) {
-                        continue;
-                    }
+                DragEvent::Dragging { id, pos } if Some(*id) == knob.drag_id => {
                     knob.current_pos = *pos;
                     let half = knob.interactable_zone.half_size();
                     if node.behavior == TouchStickType::Dynamic {
@@ -71,10 +60,7 @@ pub(crate) fn update_input<
                     // input events are y positive down, so we flip it
                     knob.value = Vec2::new(d.x, -d.y) / length.max(1.);
                 }
-                DragEvent::EndDrag { id } => {
-                    if !is_some_and(knob.drag_id, |i| i == *id) {
-                        continue;
-                    }
+                DragEvent::EndDrag { id } if Some(*id) == knob.drag_id => {
                     knob.drag_id = None;
                     knob.base_pos = Vec2::ZERO;
                     knob.start_pos = Vec2::ZERO;
@@ -86,6 +72,7 @@ pub(crate) fn update_input<
                         value: Vec2::ZERO,
                     });
                 }
+                _ => {}
             }
         }
 
