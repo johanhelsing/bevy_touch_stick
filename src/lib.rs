@@ -37,7 +37,7 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect 
             .register_type::<TouchStickNode<S>>()
             .register_type::<VirtualJoystickKnob>()
             .register_type::<TouchStickType>()
-            .register_type::<VirtualJoystickEventType>()
+            .register_type::<TouchStickEventType>()
             .add_event::<TouchStickEvent<S>>()
             .add_event::<DragEvent>()
             .add_systems(PreUpdate, update_joystick.before(update_input::<S>))
@@ -86,7 +86,7 @@ fn joystick_image_node_system<
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Reflect)]
 #[reflect]
-pub enum VirtualJoystickEventType {
+pub enum TouchStickEventType {
     Press,
     Drag,
     Up,
@@ -95,7 +95,7 @@ pub enum VirtualJoystickEventType {
 #[derive(Event)]
 pub struct TouchStickEvent<S: Hash + Sync + Send + Clone + Default + Reflect + 'static + TypePath> {
     id: S,
-    event: VirtualJoystickEventType,
+    event: TouchStickEventType,
     value: Vec2,
 }
 
@@ -111,7 +111,7 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + 'static> Tou
     }
 
     /// Return the Type of Joystick Event
-    pub fn get_type(&self) -> VirtualJoystickEventType {
+    pub fn get_type(&self) -> TouchStickEventType {
         self.event
     }
 }

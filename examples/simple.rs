@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_touch_stick::{
-    prelude::*, TintColor, TouchStickEvent, TouchStickInteractionArea, VirtualJoystickEventType,
+    prelude::*, TintColor, TouchStickEvent, TouchStickEventType, TouchStickInteractionArea,
 };
 
 fn main() {
@@ -73,10 +73,8 @@ fn update_stick_color(
 ) {
     for event in stick_events.iter() {
         let tint_color = match event.get_type() {
-            VirtualJoystickEventType::Press | VirtualJoystickEventType::Drag => {
-                TintColor(Color::WHITE)
-            }
-            VirtualJoystickEventType::Up => TintColor(Color::WHITE.with_a(0.2)),
+            TouchStickEventType::Press | TouchStickEventType::Drag => TintColor(Color::WHITE),
+            TouchStickEventType::Up => TintColor(Color::WHITE.with_a(0.2)),
         };
 
         for (mut color, node) in &mut sticks {

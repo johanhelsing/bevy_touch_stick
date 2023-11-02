@@ -8,8 +8,8 @@ use bevy::{
 };
 
 use crate::{
-    joystick::VirtualJoystickKnob, TouchStickEvent, TouchStickNode, TouchStickType,
-    VirtualJoystickEventType,
+    joystick::VirtualJoystickKnob, TouchStickEvent, TouchStickEventType, TouchStickNode,
+    TouchStickType,
 };
 
 #[derive(Event)]
@@ -49,7 +49,7 @@ pub(crate) fn update_input<
                         knob.value = Vec2::ZERO;
                         send_values.send(TouchStickEvent {
                             id: node.id.clone(),
-                            event: VirtualJoystickEventType::Press,
+                            event: TouchStickEventType::Press,
                             value: Vec2::ZERO,
                         });
                     }
@@ -85,7 +85,7 @@ pub(crate) fn update_input<
                     knob.value = Vec2::ZERO;
                     send_values.send(TouchStickEvent {
                         id: node.id.clone(),
-                        event: VirtualJoystickEventType::Up,
+                        event: TouchStickEventType::Up,
                         value: Vec2::ZERO,
                     });
                 }
@@ -98,7 +98,7 @@ pub(crate) fn update_input<
         {
             send_values.send(TouchStickEvent {
                 id: node.id.clone(),
-                event: VirtualJoystickEventType::Drag,
+                event: TouchStickEventType::Drag,
                 value: knob.value,
             });
         }
