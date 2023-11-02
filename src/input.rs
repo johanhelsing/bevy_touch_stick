@@ -117,10 +117,10 @@ pub(crate) fn update_joystick_by_mouse(
     mouse_buttons: Res<Input<MouseButton>>,
     mut mouse_events: EventReader<MouseButtonInput>,
     mut drag_events: EventWriter<DragEvent>,
-    windows: Query<&Window, With<PrimaryWindow>>,
+    primary_window: Query<&Window, With<PrimaryWindow>>,
 ) {
-    let window = windows.single();
-    let pos = window.cursor_position().unwrap_or(Vec2::ZERO);
+    let primary_window = primary_window.single();
+    let pos = primary_window.cursor_position().unwrap_or(Vec2::ZERO);
 
     for mouse_event in mouse_events.iter() {
         if mouse_event.button == MouseButton::Left && mouse_event.state == ButtonState::Released {
