@@ -19,7 +19,7 @@ pub use crate::{
     joystick::{TintColor, TouchStickBundle, TouchStickInteractionArea, TouchStickNode},
 };
 use crate::{
-    input::{update_input, update_joystick, update_joystick_by_mouse, DragEvent},
+    input::{update_input, update_sticks, update_sticks_from_mouse, DragEvent},
     joystick::{extract_joystick_node, TouchStickKnob},
 };
 
@@ -45,10 +45,10 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect 
             .register_type::<TouchStickEventType>()
             .add_event::<TouchStickEvent<S>>()
             .add_event::<DragEvent>()
-            .add_systems(PreUpdate, update_joystick.before(update_input::<S>))
+            .add_systems(PreUpdate, update_sticks.before(update_input::<S>))
             .add_systems(
                 PreUpdate,
-                update_joystick_by_mouse.before(update_input::<S>),
+                update_sticks_from_mouse.before(update_input::<S>),
             )
             .add_systems(PreUpdate, update_input::<S>)
             .add_systems(

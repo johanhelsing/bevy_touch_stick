@@ -13,24 +13,24 @@ use crate::{
 
 #[derive(Event)]
 pub(crate) enum DragEvent {
-    StartDrag { id: u64, pos: Vec2 },
-    Dragging { id: u64, pos: Vec2 },
-    EndDrag { id: u64 },
+    Start { id: u64, pos: Vec2 },
+    Drag { id: u64, pos: Vec2 },
+    End { id: u64 },
 }
 
 pub(crate) fn update_input<
     S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect + 'static,
 >(
-    mut input_events: EventReader<DragEvent>,
+    mut drag_events: EventReader<DragEvent>,
     mut stick_events: EventWriter<TouchStickEvent<S>>,
     mut sticks: Query<(&TouchStickNode<S>, &mut TouchStickKnob)>,
 ) {
-    let input_events = input_events.iter().collect::<Vec<&DragEvent>>();
+    let input_events = drag_events.iter().collect::<Vec<&DragEvent>>();
 
     for (node, mut knob) in sticks.iter_mut() {
         for event in &input_events {
             match event {
-                DragEvent::StartDrag { id, pos } => {
+                DragEvent::Start { id, pos } => {
                     if knob.interactable_zone.contains(*pos) && knob.drag_id != Some(*id) {
                         knob.drag_id = Some(*id);
                         knob.start_pos = *pos;
@@ -43,7 +43,7 @@ pub(crate) fn update_input<
                         });
                     }
                 }
-                DragEvent::Dragging { id, pos } if Some(*id) == knob.drag_id => {
+                DragEvent::Drag { id, pos } if Some(*id) == knob.drag_id => {
                     knob.current_pos = *pos;
                     let half = knob.interactable_zone.half_size();
                     if node.behavior == TouchStickType::Dynamic {
@@ -60,7 +60,7 @@ pub(crate) fn update_input<
                     // input events are y positive down, so we flip it
                     knob.value = Vec2::new(d.x, -d.y) / length.max(1.);
                 }
-                DragEvent::EndDrag { id } if Some(*id) == knob.drag_id => {
+                DragEvent::End { id } if Some(*id) == knob.drag_id => {
                     knob.drag_id = None;
                     knob.base_pos = Vec2::ZERO;
                     knob.start_pos = Vec2::ZERO;
@@ -89,7 +89,7 @@ pub(crate) fn update_input<
     }
 }
 
-pub(crate) fn update_joystick(
+pub(crate) fn update_sticks(
     mut touch_events: EventReader<TouchInput>,
     mut send_values: EventWriter<DragEvent>,
 ) {
@@ -101,19 +101,19 @@ pub(crate) fn update_joystick(
     for (id, phase, pos) in &touches {
         match phase {
             TouchPhase::Started => {
-                send_values.send(DragEvent::StartDrag { id: *id, pos: *pos });
+                send_values.send(DragEvent::Start { id: *id, pos: *pos });
             }
             TouchPhase::Moved => {
-                send_values.send(DragEvent::Dragging { id: *id, pos: *pos });
+                send_values.send(DragEvent::Drag { id: *id, pos: *pos });
             }
             TouchPhase::Ended | TouchPhase::Canceled => {
-                send_values.send(DragEvent::EndDrag { id: *id });
+                send_values.send(DragEvent::End { id: *id });
             }
         }
     }
 }
 
-pub(crate) fn update_joystick_by_mouse(
+pub(crate) fn update_sticks_from_mouse(
     mouse_buttons: Res<Input<MouseButton>>,
     mut mouse_events: EventReader<MouseButtonInput>,
     mut drag_events: EventWriter<DragEvent>,
@@ -124,15 +124,15 @@ pub(crate) fn update_joystick_by_mouse(
 
     for mouse_event in mouse_events.iter() {
         if mouse_event.button == MouseButton::Left && mouse_event.state == ButtonState::Released {
-            drag_events.send(DragEvent::EndDrag { id: 0 });
+            drag_events.send(DragEvent::End { id: 0 });
         }
 
         if mouse_event.button == MouseButton::Left && mouse_event.state == ButtonState::Pressed {
-            drag_events.send(DragEvent::StartDrag { id: 0, pos });
+            drag_events.send(DragEvent::Start { id: 0, pos });
         }
     }
 
     if mouse_buttons.pressed(MouseButton::Left) {
-        drag_events.send(DragEvent::Dragging { id: 0, pos });
+        drag_events.send(DragEvent::Drag { id: 0, pos });
     }
 }
