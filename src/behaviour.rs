@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Reflect, Clone, Copy, Debug, Default, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub enum VirtualJoystickType {
+pub enum TouchStickType {
     /// Static position
     Fixed,
     #[default]

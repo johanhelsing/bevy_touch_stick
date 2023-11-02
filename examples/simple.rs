@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_touch_stick::{
-    prelude::*, TintColor, VirtualJoystickEvent, VirtualJoystickEventType,
-    VirtualJoystickInteractionArea,
+    prelude::*, TintColor, TouchStickEvent, TouchStickInteractionArea, VirtualJoystickEventType,
 };
 
 fn main() {
@@ -12,7 +11,7 @@ fn main() {
         // Add an inspector for easily changing settings at runtime
         .add_plugins(WorldInspectorPlugin::new())
         // Add the plugin
-        .add_plugins(VirtualJoystickPlugin::<String>::default())
+        .add_plugins(TouchStickPlugin::<String>::default())
         .add_systems(Startup, setup)
         .add_systems(Update, (update_stick_color, move_player))
         .run();
@@ -43,14 +42,14 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // spawn stick at horizontal center
     commands.spawn((
-        VirtualJoystickInteractionArea,
-        VirtualJoystickBundle::new(VirtualJoystickNode {
+        TouchStickInteractionArea,
+        TouchStickBundle::new(TouchStickNode {
             border_image: asset_server.load("outline.png"),
             knob_image: asset_server.load("knob.png"),
             knob_size: Vec2::new(80., 80.),
             dead_zone: 0.,
             id: "UniqueJoystick".to_string(),
-            behaviour: VirtualJoystickType::Floating,
+            behaviour: TouchStickType::Floating,
         })
         .set_color(TintColor(Color::WHITE.with_a(0.2)))
         .set_style(Style {
@@ -67,8 +66,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn update_stick_color(
-    mut stick_events: EventReader<VirtualJoystickEvent<String>>,
-    mut sticks: Query<(&mut TintColor, &VirtualJoystickNode<String>)>,
+    mut stick_events: EventReader<TouchStickEvent<String>>,
+    mut sticks: Query<(&mut TintColor, &TouchStickNode<String>)>,
 ) {
     for event in stick_events.iter() {
         let tint_color = match event.get_type() {
@@ -88,7 +87,7 @@ fn update_stick_color(
 
 fn move_player(
     // todo: this should use a resource/component instead of events
-    mut stick_events: EventReader<VirtualJoystickEvent<String>>,
+    mut stick_events: EventReader<TouchStickEvent<String>>,
     mut players: Query<(&mut Transform, &Player)>,
     time: Res<Time>,
 ) {

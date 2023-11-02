@@ -11,16 +11,12 @@ mod input;
 mod joystick;
 
 pub mod prelude {
-    pub use crate::{
-        VirtualJoystickBundle, VirtualJoystickNode, VirtualJoystickPlugin, VirtualJoystickType,
-    };
+    pub use crate::{TouchStickBundle, TouchStickNode, TouchStickPlugin, TouchStickType};
 }
 
 pub use crate::{
-    behaviour::VirtualJoystickType,
-    joystick::{
-        TintColor, VirtualJoystickBundle, VirtualJoystickInteractionArea, VirtualJoystickNode,
-    },
+    behaviour::TouchStickType,
+    joystick::{TintColor, TouchStickBundle, TouchStickInteractionArea, TouchStickNode},
 };
 use crate::{
     input::{update_input, update_joystick, update_joystick_by_mouse, DragEvent},
@@ -28,21 +24,21 @@ use crate::{
 };
 
 #[derive(Default)]
-pub struct VirtualJoystickPlugin<S> {
+pub struct TouchStickPlugin<S> {
     _marker: PhantomData<S>,
 }
 
 impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect + 'static> Plugin
-    for VirtualJoystickPlugin<S>
+    for TouchStickPlugin<S>
 {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.register_type::<TintColor>()
-            .register_type::<VirtualJoystickInteractionArea>()
-            .register_type::<VirtualJoystickNode<S>>()
+            .register_type::<TouchStickInteractionArea>()
+            .register_type::<TouchStickNode<S>>()
             .register_type::<VirtualJoystickKnob>()
-            .register_type::<VirtualJoystickType>()
+            .register_type::<TouchStickType>()
             .register_type::<VirtualJoystickEventType>()
-            .add_event::<VirtualJoystickEvent<S>>()
+            .add_event::<TouchStickEvent<S>>()
             .add_event::<DragEvent>()
             .add_systems(PreUpdate, update_joystick.before(update_input::<S>))
             .add_systems(
@@ -69,12 +65,8 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect 
 fn joystick_image_node_system<
     S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static,
 >(
-    interaction_area: Query<(&Node, With<VirtualJoystickInteractionArea>)>,
-    mut joystick: Query<(
-        &Transform,
-        &VirtualJoystickNode<S>,
-        &mut VirtualJoystickKnob,
-    )>,
+    interaction_area: Query<(&Node, With<TouchStickInteractionArea>)>,
+    mut joystick: Query<(&Transform, &TouchStickNode<S>, &mut VirtualJoystickKnob)>,
 ) {
     let interaction_area = interaction_area
         .iter()
@@ -101,17 +93,13 @@ pub enum VirtualJoystickEventType {
 }
 
 #[derive(Event)]
-pub struct VirtualJoystickEvent<
-    S: Hash + Sync + Send + Clone + Default + Reflect + 'static + TypePath,
-> {
+pub struct TouchStickEvent<S: Hash + Sync + Send + Clone + Default + Reflect + 'static + TypePath> {
     id: S,
     event: VirtualJoystickEventType,
     value: Vec2,
 }
 
-impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + 'static>
-    VirtualJoystickEvent<S>
-{
+impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + 'static> TouchStickEvent<S> {
     /// Get Id of joystick throw event
     pub fn id(&self) -> S {
         self.id.clone()

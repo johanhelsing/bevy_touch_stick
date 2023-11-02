@@ -9,7 +9,7 @@ use bevy::{
     },
 };
 
-use crate::VirtualJoystickType;
+use crate::TouchStickType;
 
 /// The tint color of the image
 ///
@@ -38,11 +38,11 @@ impl From<Color> for TintColor {
 /// Marker component for a bevy_ui Node area where sticks can be interacted with.
 #[derive(Component, Copy, Clone, Debug, Default, Reflect)]
 #[reflect(Component, Default)]
-pub struct VirtualJoystickInteractionArea;
+pub struct TouchStickInteractionArea;
 
 // TODO: default returns a broken bundle, should remove or fix
 #[derive(Bundle, Debug, Default)]
-pub struct VirtualJoystickBundle<
+pub struct TouchStickBundle<
     S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static,
 > {
     /// Describes the size of the node
@@ -54,7 +54,7 @@ pub struct VirtualJoystickBundle<
     /// The tint color of the image
     pub(crate) color: TintColor,
     /// The texture atlas image of the node
-    pub(crate) joystick: VirtualJoystickNode<S>,
+    pub(crate) joystick: TouchStickNode<S>,
     /// Whether this node should block interaction with lower nodes
     pub(crate) focus_policy: FocusPolicy,
     /// The transform of the node
@@ -73,9 +73,8 @@ pub struct VirtualJoystickBundle<
 
 #[derive(Component, Clone, Debug, Default, Reflect)]
 #[reflect(Component, Default)]
-pub struct VirtualJoystickNode<
-    S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static,
-> {
+pub struct TouchStickNode<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static>
+{
     /// Identifier of joystick
     pub id: S,
     /// Image for background or border image on joystick
@@ -87,7 +86,7 @@ pub struct VirtualJoystickNode<
     /// Zone to ignore movement
     pub dead_zone: f32,
     /// Define the behaviour of joystick
-    pub behaviour: VirtualJoystickType,
+    pub behaviour: TouchStickType,
 }
 
 #[derive(Component, Clone, Debug, Default, Reflect)]
@@ -104,9 +103,9 @@ pub struct VirtualJoystickKnob {
 }
 
 impl<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static>
-    VirtualJoystickBundle<S>
+    TouchStickBundle<S>
 {
-    pub fn new(joystick: VirtualJoystickNode<S>) -> Self {
+    pub fn new(joystick: TouchStickNode<S>) -> Self {
         Self {
             joystick,
             ..default()
@@ -171,7 +170,7 @@ pub fn extract_joystick_node<
             &Node,
             &GlobalTransform,
             &TintColor,
-            &VirtualJoystickNode<S>,
+            &TouchStickNode<S>,
             &ComputedVisibility,
             &VirtualJoystickKnob,
         )>,
@@ -187,7 +186,7 @@ pub fn extract_joystick_node<
                 || color.0.a() == 0.0
                 || !images.contains(&joystick_node.border_image)
                 || !images.contains(&joystick_node.knob_image)
-                || data.id_drag.is_none() && joystick_node.behaviour == VirtualJoystickType::Dynamic
+                || data.id_drag.is_none() && joystick_node.behaviour == TouchStickType::Dynamic
             {
                 continue;
             }
@@ -197,10 +196,10 @@ pub fn extract_joystick_node<
             };
 
             let border_pos = match joystick_node.behaviour {
-                VirtualJoystickType::Fixed => global_transform
+                TouchStickType::Fixed => global_transform
                     .compute_matrix()
                     .transform_point3((container_rect.center() - (uinode.size() / 2.)).extend(0.)),
-                VirtualJoystickType::Floating => {
+                TouchStickType::Floating => {
                     if data.id_drag.is_none() {
                         global_transform.compute_matrix().transform_point3(
                             (container_rect.center() - (uinode.size() / 2.)).extend(0.),
@@ -209,7 +208,7 @@ pub fn extract_joystick_node<
                         data.start_pos.extend(0.)
                     }
                 }
-                VirtualJoystickType::Dynamic => data.base_pos.extend(0.),
+                TouchStickType::Dynamic => data.base_pos.extend(0.),
             };
 
             extracted_uinodes.uinodes.push(ExtractedUiNode {
@@ -235,10 +234,10 @@ pub fn extract_joystick_node<
             let pos = Vec2::new(axis_value.x, -axis_value.y) * radius;
 
             let knob_pos = match joystick_node.behaviour {
-                VirtualJoystickType::Fixed => global_transform.compute_matrix().transform_point3(
+                TouchStickType::Fixed => global_transform.compute_matrix().transform_point3(
                     (container_rect.center() - (uinode.size() / 2.) + pos).extend(0.),
                 ),
-                VirtualJoystickType::Floating => {
+                TouchStickType::Floating => {
                     if data.id_drag.is_none() {
                         global_transform.compute_matrix().transform_point3(
                             (container_rect.center() - (uinode.size() / 2.)).extend(0.),
@@ -247,7 +246,7 @@ pub fn extract_joystick_node<
                         (data.start_pos + pos).extend(0.)
                     }
                 }
-                VirtualJoystickType::Dynamic => (data.base_pos + pos).extend(0.),
+                TouchStickType::Dynamic => (data.base_pos + pos).extend(0.),
             };
 
             extracted_uinodes.uinodes.push(ExtractedUiNode {
