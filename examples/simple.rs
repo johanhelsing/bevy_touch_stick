@@ -73,18 +73,16 @@ fn update_stick_color(
     mut sticks: Query<(&mut TintColor, &VirtualJoystickNode<String>)>,
 ) {
     for event in stick_events.iter() {
+        let tint_color = match event.get_type() {
+            VirtualJoystickEventType::Press | VirtualJoystickEventType::Drag => {
+                TintColor(Color::WHITE)
+            }
+            VirtualJoystickEventType::Up => TintColor(Color::WHITE.with_a(0.2)),
+        };
+
         for (mut color, node) in &mut sticks {
-            match event.get_type() {
-                VirtualJoystickEventType::Press | VirtualJoystickEventType::Drag => {
-                    if node.id == event.id() {
-                        *color = TintColor(Color::WHITE);
-                    }
-                }
-                VirtualJoystickEventType::Up => {
-                    if node.id == event.id() {
-                        *color = TintColor(Color::WHITE.with_a(0.2));
-                    }
-                }
+            if node.id == event.id() {
+                *color = tint_color;
             }
         }
     }
