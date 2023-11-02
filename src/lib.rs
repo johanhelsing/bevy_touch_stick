@@ -11,7 +11,7 @@ mod behaviour;
 mod input;
 mod joystick;
 
-pub use behaviour::{VirtualJoystickAxis, VirtualJoystickType};
+pub use behaviour::VirtualJoystickType;
 use input::{run_if_pc, update_input, update_joystick, update_joystick_by_mouse, InputEvent};
 pub use joystick::{
     TintColor, VirtualJoystickBundle, VirtualJoystickInteractionArea, VirtualJoystickNode,
@@ -32,7 +32,6 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect 
             .register_type::<VirtualJoystickInteractionArea>()
             .register_type::<VirtualJoystickNode<S>>()
             .register_type::<VirtualJoystickKnob>()
-            .register_type::<VirtualJoystickAxis>()
             .register_type::<VirtualJoystickType>()
             .register_type::<VirtualJoystickEventType>()
             .add_event::<VirtualJoystickEvent<S>>()
@@ -107,8 +106,6 @@ pub struct VirtualJoystickEvent<
     id: S,
     event: VirtualJoystickEventType,
     value: Vec2,
-    delta: Vec2,
-    axis: VirtualJoystickAxis,
 }
 
 impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + 'static>
@@ -118,58 +115,14 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + 'static>
     pub fn id(&self) -> S {
         self.id.clone()
     }
-    /// Raw position of point (Mouse or Touch)
+
+    /// Value of the joystick, maximum length 1
     pub fn value(&self) -> Vec2 {
         self.value
-    }
-
-    /// Axis of Joystick see [crate::VirtualJoystickAxis]
-    pub fn direction(&self) -> VirtualJoystickAxis {
-        self.axis
-    }
-
-    /// Delta value ranging from 0 to 1 in each vector (x and y)
-    pub fn axis(&self) -> Vec2 {
-        self.delta
     }
 
     /// Return the Type of Joystick Event
     pub fn get_type(&self) -> VirtualJoystickEventType {
         self.event
-    }
-
-    /// Delta value snaped
-    /// the dead_zone is required for make more customizable
-    /// the default of the dead_zone is 0.5
-    pub fn snap_axis(&self, dead_zone: Option<f32>) -> Vec2 {
-        let dead_zone = dead_zone.unwrap_or(0.5);
-        let x = if self.axis == VirtualJoystickAxis::Both
-            || self.axis == VirtualJoystickAxis::Horizontal
-        {
-            if self.delta.x > dead_zone {
-                1.
-            } else if self.delta.x < -dead_zone {
-                -1.
-            } else {
-                0.
-            }
-        } else {
-            0.
-        };
-        let y = if self.axis == VirtualJoystickAxis::Both
-            || self.axis == VirtualJoystickAxis::Vertical
-        {
-            if self.delta.y > dead_zone {
-                1.
-            } else if self.delta.y < -dead_zone {
-                -1.
-            } else {
-                0.
-            }
-        } else {
-            0.
-        };
-
-        Vec2::new(x, y)
     }
 }

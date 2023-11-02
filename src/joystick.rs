@@ -9,7 +9,7 @@ use bevy::{
     },
 };
 
-use crate::{VirtualJoystickAxis, VirtualJoystickType};
+use crate::VirtualJoystickType;
 
 /// The tint color of the image
 ///
@@ -84,8 +84,6 @@ pub struct VirtualJoystickNode<
     pub knob_size: Vec2,
     /// Zone to ignore movement
     pub dead_zone: f32,
-    /// Define Axis for this joystick
-    pub axis: VirtualJoystickAxis,
     /// Define the behaviour of joystick
     pub behaviour: VirtualJoystickType,
 }
@@ -98,16 +96,9 @@ pub struct VirtualJoystickKnob {
     pub base_pos: Vec2,
     pub start_pos: Vec2,
     pub current_pos: Vec2,
-    pub delta: Vec2,
+    /// Value with maximum magnitude 1
+    pub value: Vec2,
     pub interactable_zone_rect: Rect,
-}
-
-impl VirtualJoystickKnob {
-    /// Returns the joystick value with maximum magnitude 1
-    fn value(&self) -> Vec2 {
-        let angle = self.delta.y.atan2(self.delta.x);
-        Vec2::new(angle.cos(), angle.sin()) * f32::min(self.delta.length(), 1.)
-    }
 }
 
 impl<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static>
@@ -237,32 +228,24 @@ pub fn extract_joystick_node<
             };
 
             let radius = uinode.size().x / 2.;
-            let axis_value = data.value();
-            let x = axis_value.x * radius;
-            let y = axis_value.y * radius;
+            let axis_value = data.value;
+            // ui is y down, so we flip
+            let pos = Vec2::new(axis_value.x, -axis_value.y) * radius;
 
             let knob_pos = match joystick_node.behaviour {
                 VirtualJoystickType::Fixed => global_transform.compute_matrix().transform_point3(
-                    (container_rect.center()
-                        - (uinode.size() / 2.)
-                        - joystick_node.axis.handle_xy(x, y))
-                    .extend(0.),
+                    (container_rect.center() - (uinode.size() / 2.) + pos).extend(0.),
                 ),
                 VirtualJoystickType::Floating => {
                     if data.id_drag.is_none() {
                         global_transform.compute_matrix().transform_point3(
-                            (container_rect.center()
-                                - (uinode.size() / 2.)
-                                - joystick_node.axis.handle_xy(x, y))
-                            .extend(0.),
+                            (container_rect.center() - (uinode.size() / 2.)).extend(0.),
                         )
                     } else {
-                        (data.start_pos - joystick_node.axis.handle_xy(x, y)).extend(0.)
+                        (data.start_pos + pos).extend(0.)
                     }
                 }
-                VirtualJoystickType::Dynamic => {
-                    (data.base_pos - joystick_node.axis.handle_xy(x, y)).extend(0.)
-                }
+                VirtualJoystickType::Dynamic => (data.base_pos + pos).extend(0.),
             };
 
             extracted_uinodes.uinodes.push(ExtractedUiNode {

@@ -44,7 +44,6 @@ fn create_scene(mut cmd: Commands, asset_server: Res<AssetServer>) {
             knob_size: Vec2::new(80., 80.),
             dead_zone: 0.,
             id: "UniqueJoystick".to_string(),
-            axis: VirtualJoystickAxis::Both,
             behaviour: VirtualJoystickType::Floating,
         })
         .set_color(TintColor(Color::WHITE.with_a(0.2)))
@@ -70,7 +69,7 @@ fn update_joystick(
     let (mut player, player_data) = player.single_mut();
 
     for j in joystick.iter() {
-        let Vec2 { x, y } = j.axis();
+        let Vec2 { x, y } = j.value();
         match j.get_type() {
             VirtualJoystickEventType::Press | VirtualJoystickEventType::Drag => {
                 let (mut color, node) = joystick_color.single_mut();

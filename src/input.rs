@@ -50,13 +50,11 @@ pub fn update_input<
                         knob.id_drag = Some(*id);
                         knob.start_pos = *pos;
                         knob.current_pos = *pos;
-                        knob.delta = Vec2::ZERO;
+                        knob.value = Vec2::ZERO;
                         send_values.send(VirtualJoystickEvent {
                             id: node.id.clone(),
                             event: VirtualJoystickEventType::Press,
                             value: Vec2::ZERO,
-                            delta: Vec2::ZERO,
-                            axis: node.axis,
                         });
                     }
                 }
@@ -75,9 +73,10 @@ pub fn update_input<
                             knob.start_pos += to_knob.normalize() * excess_distance;
                         }
                     }
-                    let d = (knob.start_pos - knob.current_pos) / half;
+                    let d = (knob.current_pos - knob.start_pos) / half;
                     let length = d.length();
-                    knob.delta = d / length.max(1.);
+                    // input events are y positive down, so we flip it
+                    knob.value = Vec2::new(d.x, -d.y) / length.max(1.);
                 }
                 InputEvent::EndDrag { id, pos: _ } => {
                     if !is_some_and(knob.id_drag, |i| i == *id) {
@@ -87,28 +86,24 @@ pub fn update_input<
                     knob.base_pos = Vec2::ZERO;
                     knob.start_pos = Vec2::ZERO;
                     knob.current_pos = Vec2::ZERO;
-                    knob.delta = Vec2::ZERO;
+                    knob.value = Vec2::ZERO;
                     send_values.send(VirtualJoystickEvent {
                         id: node.id.clone(),
                         event: VirtualJoystickEventType::Up,
                         value: Vec2::ZERO,
-                        delta: Vec2::ZERO,
-                        axis: node.axis,
                     });
                 }
             }
         }
 
         // Send event
-        if (knob.delta.x.abs() >= knob.dead_zone || knob.delta.y.abs() >= knob.dead_zone)
+        if (knob.value.x.abs() >= knob.dead_zone || knob.value.y.abs() >= knob.dead_zone)
             && knob.id_drag.is_some()
         {
             send_values.send(VirtualJoystickEvent {
                 id: node.id.clone(),
                 event: VirtualJoystickEventType::Drag,
-                value: node.axis.handle_xy(-knob.current_pos.x, knob.current_pos.y),
-                delta: node.axis.handle_xy(-knob.delta.x, knob.delta.y),
-                axis: node.axis,
+                value: knob.value,
             });
         }
     }
