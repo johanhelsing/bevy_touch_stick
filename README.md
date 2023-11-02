@@ -118,8 +118,8 @@ fn create_scene(mut cmd: Commands, asset_server: Res<AssetServer>) {
     cmd.spawn(
         // Define variable for Joystick
         VirtualJoystickBundle::new(VirtualJoystickNode {
-            border_image: asset_server.load("Outline.png"),
-            knob_image: asset_server.load("Knob.png"),
+            border_image: asset_server.load("outline.png"),
+            knob_image: asset_server.load("knob.png"),
             knob_size: Vec2::new(80., 80.),
             dead_zone: 0.,
             id: JoystickControllerID::Joystick1,
