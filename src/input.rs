@@ -39,8 +39,8 @@ pub(crate) fn update_input<
         for event in &input_events {
             match event {
                 DragEvent::StartDrag { id, pos } => {
-                    if knob.interactable_zone.contains(*pos) && knob.id_drag != Some(*id) {
-                        knob.id_drag = Some(*id);
+                    if knob.interactable_zone.contains(*pos) && knob.drag_id != Some(*id) {
+                        knob.drag_id = Some(*id);
                         knob.start_pos = *pos;
                         knob.current_pos = *pos;
                         knob.value = Vec2::ZERO;
@@ -52,7 +52,7 @@ pub(crate) fn update_input<
                     }
                 }
                 DragEvent::Dragging { id, pos } => {
-                    if !is_some_and(knob.id_drag, |i| i == *id) {
+                    if !is_some_and(knob.drag_id, |i| i == *id) {
                         continue;
                     }
                     knob.current_pos = *pos;
@@ -72,10 +72,10 @@ pub(crate) fn update_input<
                     knob.value = Vec2::new(d.x, -d.y) / length.max(1.);
                 }
                 DragEvent::EndDrag { id } => {
-                    if !is_some_and(knob.id_drag, |i| i == *id) {
+                    if !is_some_and(knob.drag_id, |i| i == *id) {
                         continue;
                     }
-                    knob.id_drag = None;
+                    knob.drag_id = None;
                     knob.base_pos = Vec2::ZERO;
                     knob.start_pos = Vec2::ZERO;
                     knob.current_pos = Vec2::ZERO;
@@ -91,7 +91,7 @@ pub(crate) fn update_input<
 
         // Send event
         if (knob.value.x.abs() >= knob.dead_zone || knob.value.y.abs() >= knob.dead_zone)
-            && knob.id_drag.is_some()
+            && knob.drag_id.is_some()
         {
             stick_events.send(TouchStickEvent {
                 id: node.id.clone(),
