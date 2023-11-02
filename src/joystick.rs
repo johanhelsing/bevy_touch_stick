@@ -39,6 +39,7 @@ impl From<Color> for TintColor {
 #[reflect(Component, Default)]
 pub struct VirtualJoystickInteractionArea;
 
+// TODO: default returns a broken bundle, should remove or fix
 #[derive(Bundle, Debug, Default)]
 pub struct VirtualJoystickBundle<
     S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static,

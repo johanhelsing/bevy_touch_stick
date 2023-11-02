@@ -7,8 +7,8 @@ use virtual_joystick::*;
 #[derive(Default, Reflect, Hash, Clone, PartialEq, Eq)]
 enum JoystickController {
     #[default]
-    MovementX,
-    MovementY,
+    LeftStick,
+    RightStick,
 }
 
 fn main() {
@@ -47,12 +47,11 @@ fn create_scene(mut cmd: Commands, asset_server: Res<AssetServer>) {
     // Spawn Virtual Joystick on left
     cmd.spawn(
         VirtualJoystickBundle::new(VirtualJoystickNode {
-            border_image: asset_server.load("Horizontal_Outline_Arrows.png"),
+            border_image: asset_server.load("Outline.png"),
             knob_image: asset_server.load("Knob.png"),
             knob_size: Vec2::new(80., 80.),
             dead_zone: 0.,
-            id: JoystickController::MovementX,
-            axis: VirtualJoystickAxis::Horizontal,
+            id: JoystickController::LeftStick,
             behaviour: VirtualJoystickType::Fixed,
         })
         .set_color(TintColor(Color::WHITE.with_a(0.2)))
@@ -71,12 +70,11 @@ fn create_scene(mut cmd: Commands, asset_server: Res<AssetServer>) {
     // Spawn Virtual Joystick on Right
     cmd.spawn(
         VirtualJoystickBundle::new(VirtualJoystickNode {
-            border_image: asset_server.load("Vertical_Outline_Arrows.png"),
+            border_image: asset_server.load("Outline.png"),
             knob_image: asset_server.load("Knob.png"),
             knob_size: Vec2::new(80., 80.),
             dead_zone: 0.,
-            id: JoystickController::MovementY,
-            axis: VirtualJoystickAxis::Vertical,
+            id: JoystickController::RightStick,
             behaviour: VirtualJoystickType::Fixed,
         })
         .set_color(TintColor(Color::WHITE.with_a(0.2)))
@@ -102,7 +100,7 @@ fn update_joystick(
     let (mut player, player_data) = player.single_mut();
 
     for j in joystick.iter() {
-        let Vec2 { x, y } = j.snap_axis(None);
+        let Vec2 { x, y } = j.value();
 
         match j.get_type() {
             VirtualJoystickEventType::Press | VirtualJoystickEventType::Drag => {
@@ -122,10 +120,10 @@ fn update_joystick(
         }
 
         match j.id() {
-            JoystickController::MovementX => {
+            JoystickController::LeftStick => {
                 player.translation.x += x * player_data.0 * time_step.period.as_secs_f32();
             }
-            JoystickController::MovementY => {
+            JoystickController::RightStick => {
                 player.translation.y += y * player_data.0 * time_step.period.as_secs_f32();
             }
         }
