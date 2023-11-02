@@ -8,8 +8,7 @@ use bevy::{
 };
 
 use crate::{
-    joystick::VirtualJoystickKnob, TouchStickEvent, TouchStickEventType, TouchStickNode,
-    TouchStickType,
+    joystick::TouchStickKnob, TouchStickEvent, TouchStickEventType, TouchStickNode, TouchStickType,
 };
 
 #[derive(Event)]
@@ -30,24 +29,24 @@ pub(crate) fn update_input<
     S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect + 'static,
 >(
     mut input_events: EventReader<DragEvent>,
-    mut send_values: EventWriter<TouchStickEvent<S>>,
-    mut joysticks: Query<(&TouchStickNode<S>, &mut VirtualJoystickKnob)>,
+    mut stick_events: EventWriter<TouchStickEvent<S>>,
+    mut sticks: Query<(&TouchStickNode<S>, &mut TouchStickKnob)>,
 ) {
     let input_events = input_events.iter().collect::<Vec<&DragEvent>>();
 
-    for (node, mut knob) in joysticks.iter_mut() {
+    for (node, mut knob) in sticks.iter_mut() {
         for event in &input_events {
             match event {
                 DragEvent::StartDrag { id, pos } => {
-                    if knob.interactable_zone_rect.contains(*pos) && knob.id_drag.is_none()
+                    if knob.interactable_zone.contains(*pos) && knob.id_drag.is_none()
                         || is_some_and(knob.id_drag, |i| i != *id)
-                            && knob.interactable_zone_rect.contains(*pos)
+                            && knob.interactable_zone.contains(*pos)
                     {
                         knob.id_drag = Some(*id);
                         knob.start_pos = *pos;
                         knob.current_pos = *pos;
                         knob.value = Vec2::ZERO;
-                        send_values.send(TouchStickEvent {
+                        stick_events.send(TouchStickEvent {
                             id: node.id.clone(),
                             event: TouchStickEventType::Press,
                             value: Vec2::ZERO,
@@ -59,7 +58,7 @@ pub(crate) fn update_input<
                         continue;
                     }
                     knob.current_pos = *pos;
-                    let half = knob.interactable_zone_rect.half_size();
+                    let half = knob.interactable_zone.half_size();
                     if node.behavior == TouchStickType::Dynamic {
                         knob.base_pos = *pos;
                         let to_knob = knob.current_pos - knob.start_pos;
@@ -83,7 +82,7 @@ pub(crate) fn update_input<
                     knob.start_pos = Vec2::ZERO;
                     knob.current_pos = Vec2::ZERO;
                     knob.value = Vec2::ZERO;
-                    send_values.send(TouchStickEvent {
+                    stick_events.send(TouchStickEvent {
                         id: node.id.clone(),
                         event: TouchStickEventType::Up,
                         value: Vec2::ZERO,
@@ -96,7 +95,7 @@ pub(crate) fn update_input<
         if (knob.value.x.abs() >= knob.dead_zone || knob.value.y.abs() >= knob.dead_zone)
             && knob.id_drag.is_some()
         {
-            send_values.send(TouchStickEvent {
+            stick_events.send(TouchStickEvent {
                 id: node.id.clone(),
                 event: TouchStickEventType::Drag,
                 value: knob.value,

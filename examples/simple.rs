@@ -4,15 +4,19 @@ use bevy_touch_stick::{
     prelude::*, TintColor, TouchStickEvent, TouchStickEventType, TouchStickInteractionArea,
 };
 
+/// Marker type for our touch stick
+#[derive(Default, Reflect, Hash, Clone, PartialEq, Eq)]
+struct MyTouchStick;
+
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::BLACK))
         .add_plugins((
             DefaultPlugins,
-            // Add an inspector for easily changing settings at runtime
+            // add an inspector for easily changing settings at runtime
             WorldInspectorPlugin::default(),
-            // Add the plugin
-            TouchStickPlugin::<String>::default(),
+            // add the plugin
+            TouchStickPlugin::<MyTouchStick>::default(),
         ))
         .add_systems(Startup, setup)
         .add_systems(Update, (update_stick_color, move_player))
@@ -42,16 +46,17 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
     ));
 
-    // spawn stick at horizontal center
+    // spawn a touch stick
     commands.spawn((
+        // required marker component
         TouchStickInteractionArea,
-        TouchStickBundle::new(TouchStickNode {
+        TouchStickBundle::new(TouchStickNode::<MyTouchStick> {
             border_image: asset_server.load("outline.png"),
             knob_image: asset_server.load("knob.png"),
             knob_size: Vec2::new(80., 80.),
             dead_zone: 0.,
-            id: "UniqueJoystick".to_string(),
             behavior: TouchStickType::Floating,
+            ..default()
         })
         .set_color(TintColor(Color::WHITE.with_a(0.2)))
         .set_style(Style {

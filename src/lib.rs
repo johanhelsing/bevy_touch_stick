@@ -20,12 +20,17 @@ pub use crate::{
 };
 use crate::{
     input::{update_input, update_joystick, update_joystick_by_mouse, DragEvent},
-    joystick::{extract_joystick_node, VirtualJoystickKnob},
+    joystick::{extract_joystick_node, TouchStickKnob},
 };
 
-#[derive(Default)]
 pub struct TouchStickPlugin<S> {
     _marker: PhantomData<S>,
+}
+
+impl<S> Default for TouchStickPlugin<S> {
+    fn default() -> Self {
+        Self { _marker: default() }
+    }
 }
 
 impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect + 'static> Plugin
@@ -35,7 +40,7 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect 
         app.register_type::<TintColor>()
             .register_type::<TouchStickInteractionArea>()
             .register_type::<TouchStickNode<S>>()
-            .register_type::<VirtualJoystickKnob>()
+            .register_type::<TouchStickKnob>()
             .register_type::<TouchStickType>()
             .register_type::<TouchStickEventType>()
             .add_event::<TouchStickEvent<S>>()
@@ -66,7 +71,7 @@ fn joystick_image_node_system<
     S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static,
 >(
     interaction_area: Query<(&Node, With<TouchStickInteractionArea>)>,
-    mut joystick: Query<(&Transform, &TouchStickNode<S>, &mut VirtualJoystickKnob)>,
+    mut joystick: Query<(&Transform, &TouchStickNode<S>, &mut TouchStickKnob)>,
 ) {
     let interaction_area = interaction_area
         .iter()
@@ -80,7 +85,7 @@ fn joystick_image_node_system<
         };
         let interaction_area = Rect::from_center_size(j_pos, *size);
         knob.dead_zone = data.dead_zone;
-        knob.interactable_zone_rect = interaction_area;
+        knob.interactable_zone = interaction_area;
     }
 }
 

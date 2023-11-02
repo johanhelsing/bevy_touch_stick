@@ -67,7 +67,7 @@ pub struct TouchStickBundle<
     pub(crate) computed_visibility: ComputedVisibility,
     /// Indicates the depth at which the node should appear in the UI
     pub(crate) z_index: ZIndex,
-    pub(crate) knob_data: VirtualJoystickKnob,
+    pub(crate) knob_data: TouchStickKnob,
     pub(crate) cursor_pos: RelativeCursorPosition,
 }
 
@@ -91,7 +91,7 @@ pub struct TouchStickNode<S: Hash + Sync + Send + Clone + Default + Reflect + Fr
 
 #[derive(Component, Clone, Debug, Default, Reflect)]
 #[reflect(Component, Default)]
-pub struct VirtualJoystickKnob {
+pub struct TouchStickKnob {
     pub id_drag: Option<u64>,
     pub dead_zone: f32,
     pub base_pos: Vec2,
@@ -99,7 +99,7 @@ pub struct VirtualJoystickKnob {
     pub current_pos: Vec2,
     /// Value with maximum magnitude 1
     pub value: Vec2,
-    pub interactable_zone_rect: Rect,
+    pub interactable_zone: Rect,
 }
 
 impl<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static>
@@ -172,7 +172,7 @@ pub fn extract_joystick_node<
             &TintColor,
             &TouchStickNode<S>,
             &ComputedVisibility,
-            &VirtualJoystickKnob,
+            &TouchStickKnob,
         )>,
     >,
 ) {
