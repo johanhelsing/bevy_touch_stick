@@ -95,7 +95,7 @@ fn map_input_zones_from_ui_nodes<
 pub enum TouchStickEventType {
     Press,
     Drag,
-    Up,
+    Release,
 }
 
 #[derive(Event)]

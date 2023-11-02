@@ -68,7 +68,7 @@ pub(crate) fn update_input<
                     knob.value = Vec2::ZERO;
                     stick_events.send(TouchStickEvent {
                         id: node.id.clone(),
-                        event: TouchStickEventType::Up,
+                        event: TouchStickEventType::Release,
                         value: Vec2::ZERO,
                     });
                 }
