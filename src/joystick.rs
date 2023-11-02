@@ -102,6 +102,14 @@ pub struct VirtualJoystickKnob {
     pub interactable_zone_rect: Rect,
 }
 
+impl VirtualJoystickKnob {
+    /// Returns the joystick value with maximum magnitude 1
+    fn value(&self) -> Vec2 {
+        let angle = self.delta.y.atan2(self.delta.x);
+        Vec2::new(angle.cos(), angle.sin()) * f32::min(self.delta.length(), 1.)
+    }
+}
+
 impl<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static>
     VirtualJoystickBundle<S>
 {
@@ -229,12 +237,9 @@ pub fn extract_joystick_node<
             };
 
             let radius = uinode.size().x / 2.;
-            let delta = data.start_pos - data.current_pos;
-            let angle = delta.y.atan2(delta.x);
-            let dist = f32::min(delta.length(), radius);
-
-            let x = dist * angle.cos();
-            let y = dist * angle.sin();
+            let axis_value = data.value();
+            let x = axis_value.x * radius;
+            let y = axis_value.y * radius;
 
             let knob_pos = match joystick_node.behaviour {
                 VirtualJoystickType::Fixed => global_transform.compute_matrix().transform_point3(

@@ -76,10 +76,8 @@ pub fn update_input<
                         }
                     }
                     let d = (knob.start_pos - knob.current_pos) / half;
-                    knob.delta = Vec2::new(
-                        d.x.signum() * d.x.abs().min(1.),
-                        d.y.signum() * d.y.abs().min(1.),
-                    );
+                    let length = d.length();
+                    knob.delta = d / length.max(1.);
                 }
                 InputEvent::EndDrag { id, pos: _ } => {
                     if !is_some_and(knob.id_drag, |i| i == *id) {
