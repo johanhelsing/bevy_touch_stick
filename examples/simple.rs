@@ -6,7 +6,7 @@ use bevy_touch_stick::{
 
 /// Marker type for our touch stick
 #[derive(Default, Reflect, Hash, Clone, PartialEq, Eq)]
-struct MyTouchStick;
+struct MyStick;
 
 fn main() {
     App::new()
@@ -16,7 +16,7 @@ fn main() {
             // add an inspector for easily changing settings at runtime
             WorldInspectorPlugin::default(),
             // add the plugin
-            TouchStickPlugin::<MyTouchStick>::default(),
+            TouchStickPlugin::<MyStick>::default(),
         ))
         .add_systems(Startup, setup)
         .add_systems(Update, (update_stick_color, move_player))
@@ -50,7 +50,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
         // required marker component
         TouchStickInteractionArea,
-        TouchStickBundle::new(TouchStickNode::<MyTouchStick> {
+        TouchStickBundle::new(TouchStickNode::<MyStick> {
             border_image: asset_server.load("outline.png"),
             knob_image: asset_server.load("knob.png"),
             knob_size: Vec2::new(80., 80.),
@@ -73,8 +73,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn update_stick_color(
-    mut stick_events: EventReader<TouchStickEvent<String>>,
-    mut sticks: Query<(&mut TintColor, &TouchStickNode<String>)>,
+    mut stick_events: EventReader<TouchStickEvent<MyStick>>,
+    mut sticks: Query<(&mut TintColor, &TouchStickNode<MyStick>)>,
 ) {
     for event in stick_events.iter() {
         let tint_color = match event.get_type() {
@@ -92,7 +92,7 @@ fn update_stick_color(
 
 fn move_player(
     // todo: this should use a resource/component instead of events
-    mut stick_events: EventReader<TouchStickEvent<String>>,
+    mut stick_events: EventReader<TouchStickEvent<MyStick>>,
     mut players: Query<(&mut Transform, &Player)>,
     time: Res<Time>,
 ) {

@@ -20,9 +20,10 @@ pub(crate) enum DragEvent {
 
 fn is_some_and<T>(opt: Option<T>, cb: impl FnOnce(T) -> bool) -> bool {
     if let Some(v) = opt {
-        return cb(v);
+        cb(v)
+    } else {
+        false
     }
-    false
 }
 
 pub(crate) fn update_input<
@@ -38,10 +39,7 @@ pub(crate) fn update_input<
         for event in &input_events {
             match event {
                 DragEvent::StartDrag { id, pos } => {
-                    if knob.interactable_zone.contains(*pos) && knob.id_drag.is_none()
-                        || is_some_and(knob.id_drag, |i| i != *id)
-                            && knob.interactable_zone.contains(*pos)
-                    {
+                    if knob.interactable_zone.contains(*pos) && knob.id_drag != Some(*id) {
                         knob.id_drag = Some(*id);
                         knob.start_pos = *pos;
                         knob.current_pos = *pos;
