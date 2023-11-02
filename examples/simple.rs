@@ -7,8 +7,11 @@ use bevy_touch_stick::{
 
 fn main() {
     App::new()
+        .insert_resource(ClearColor(Color::BLACK))
         .add_plugins(DefaultPlugins)
+        // Add an inspector for easily changing settings at runtime
         .add_plugins(WorldInspectorPlugin::new())
+        // Add the plugin
         .add_plugins(VirtualJoystickPlugin::<String>::default())
         .add_systems(Startup, setup)
         .add_systems(Update, (update_stick_color, move_player))
@@ -27,23 +30,18 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 
     commands.spawn((
+        Player { max_speed: 50. },
         SpriteBundle {
-            transform: Transform {
-                translation: Vec3::new(0., 0., 0.),
-                ..default()
-            },
-            texture: asset_server.load("knob.png"),
             sprite: Sprite {
-                color: Color::PURPLE,
-                custom_size: Some(Vec2::new(50., 50.)),
+                color: Color::ORANGE,
+                custom_size: Some(Vec2::splat(50.)),
                 ..default()
             },
             ..default()
         },
-        Player { max_speed: 50. },
     ));
 
-    // Spawn a stick at horizontal center
+    // spawn stick at horizontal center
     commands.spawn((
         VirtualJoystickInteractionArea,
         VirtualJoystickBundle::new(VirtualJoystickNode {
@@ -63,8 +61,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             bottom: Val::Percent(15.),
             ..default()
         }),
-        // Make it easy to see the area in which the stick can be interacted with
-        BackgroundColor(Color::ORANGE_RED.with_a(0.3)),
+        // make it easy to see the area in which the stick can be interacted with
+        BackgroundColor(Color::WHITE.with_a(0.05)),
     ));
 }
 
