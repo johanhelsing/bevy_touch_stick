@@ -1,4 +1,4 @@
-# `bevy_virtual_stick` (work in progress)
+# `bevy_touch_stick` (work in progress)
 
 Virtual touch screen analog joysticks for the [Bevy](https://bevyengine.org/)
 game engine.

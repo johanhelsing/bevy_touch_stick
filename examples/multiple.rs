@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-
-use virtual_joystick::*;
+use bevy_touch_stick::*;
 
 // ID for joysticks
 #[derive(Default, Reflect, Hash, Clone, PartialEq, Eq)]
@@ -15,7 +14,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(WorldInspectorPlugin::new())
-        .add_plugins(VirtualJoystickPlugin::<JoystickController>::default())
+        .add_plugins(TouchStickPlugin::<JoystickController>::default())
         .add_systems(Startup, create_scene)
         .add_systems(Update, update_joystick)
         .run();
@@ -46,13 +45,13 @@ fn create_scene(mut cmd: Commands, asset_server: Res<AssetServer>) {
     .insert(Player(50.));
     // Spawn Virtual Joystick on left
     cmd.spawn(
-        VirtualJoystickBundle::new(VirtualJoystickNode {
+        TouchStickBundle::new(TouchStickNode {
             border_image: asset_server.load("outline.png"),
             knob_image: asset_server.load("knob.png"),
             knob_size: Vec2::new(80., 80.),
             dead_zone: 0.,
             id: JoystickController::LeftStick,
-            behaviour: VirtualJoystickType::Fixed,
+            behavior: TouchStickType::Fixed,
         })
         .set_color(TintColor(Color::WHITE.with_a(0.2)))
         .set_style(Style {
@@ -64,18 +63,18 @@ fn create_scene(mut cmd: Commands, asset_server: Res<AssetServer>) {
             ..default()
         }),
     )
-    .insert(BackgroundColor(Color::ORANGE_RED.with_a(0.2)))
-    .insert(VirtualJoystickInteractionArea);
+    .insert(BackgroundColor(Color::ORANGE_RED.with_a(0.2)));
 
     // Spawn Virtual Joystick on Right
     cmd.spawn(
-        VirtualJoystickBundle::new(VirtualJoystickNode {
+        TouchStickBundle::new(TouchStickNode {
             border_image: asset_server.load("outline.png"),
             knob_image: asset_server.load("knob.png"),
             knob_size: Vec2::new(80., 80.),
             dead_zone: 0.,
             id: JoystickController::RightStick,
-            behaviour: VirtualJoystickType::Fixed,
+            behavior: TouchStickType::Fixed,
+            ..default()
         })
         .set_color(TintColor(Color::WHITE.with_a(0.2)))
         .set_style(Style {
@@ -87,13 +86,12 @@ fn create_scene(mut cmd: Commands, asset_server: Res<AssetServer>) {
             ..default()
         }),
     )
-    .insert(BackgroundColor(Color::ORANGE_RED.with_a(0.2)))
-    .insert(VirtualJoystickInteractionArea);
+    .insert(BackgroundColor(Color::ORANGE_RED.with_a(0.2)));
 }
 
 fn update_joystick(
-    mut joystick: EventReader<VirtualJoystickEvent<JoystickController>>,
-    mut joystick_color: Query<(&mut TintColor, &VirtualJoystickNode<JoystickController>)>,
+    mut joystick: EventReader<TouchStickEvent<JoystickController>>,
+    mut joystick_color: Query<(&mut TintColor, &TouchStickNode<JoystickController>)>,
     mut player: Query<(&mut Transform, &Player)>,
     time_step: Res<FixedTime>,
 ) {
@@ -103,14 +101,14 @@ fn update_joystick(
         let Vec2 { x, y } = j.value();
 
         match j.get_type() {
-            VirtualJoystickEventType::Press | VirtualJoystickEventType::Drag => {
+            TouchStickEventType::Press | TouchStickEventType::Drag => {
                 for (mut color, node) in joystick_color.iter_mut() {
                     if node.id == j.id() {
                         *color = TintColor(Color::WHITE);
                     }
                 }
             }
-            VirtualJoystickEventType::Up => {
+            TouchStickEventType::Release => {
                 for (mut color, node) in joystick_color.iter_mut() {
                     if node.id == j.id() {
                         *color = TintColor(Color::WHITE.with_a(0.2));
