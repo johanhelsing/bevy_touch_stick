@@ -86,9 +86,9 @@ pub struct TouchStickNode<S: Hash + Sync + Send + Clone + Default + Reflect + Fr
     pub knob_image: Handle<Image>,
     /// Size for knob on joystick
     pub knob_size: Vec2,
-    /// Zone to ignore movement
+    /// Radius of zone to ignore movement
     pub dead_zone: f32,
-    /// Define the behaviour of joystick
+    /// Define the behavior of joystick
     pub behavior: TouchStickType,
 }
 
