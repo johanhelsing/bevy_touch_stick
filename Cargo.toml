@@ -38,4 +38,4 @@ leafwing-input-manager = "0.10"
 
 [[example]]
 name = "leafwing"
-required-features = ["bevy_input"]
+required-features = ["gamepad_mapping"]
