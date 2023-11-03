@@ -33,5 +33,5 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Install udev and libxkbcommon
-        run: sudo apt-get update; sudo apt-get install --no-install-recommends libudev-dev libxkbcommond-dev
+        run: sudo apt-get update; sudo apt-get install --no-install-recommends libudev-dev libxkbcommon-dev
       - run: cargo test
