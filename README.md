@@ -17,7 +17,7 @@ Only two-axis sticks are supported.
 
 ## Examples
 
-- [`leafwing`](./examples/leafwing.rs) (recommended): Shows how to use the project with [`leafwing-input-manager`](https://github.com/Leafwing-Studios/leafwing-input-manager)
+- [`leafwing`](./examples/leafwing.rs) (recommended): Shows usage with [`leafwing-input-manager`](https://github.com/Leafwing-Studios/leafwing-input-manager)
 - [`simple`](./examples/simple.rs)
 - [`multiple`](./examples/multiple.rs)
 
