@@ -11,7 +11,7 @@ Only two-axis sticks are supported.
 - [x] Multiple joysticks on screen (for e.g. twin stick)
 - [ ] Simple stupid implementation
 - [ ] Modular rendering
-- [ ] Integration with bevy (`Res<Input<TouchStick>>`)
+- [ ] Integration with bevy_input (`Res<Input<TouchStick>>`)
 - [ ] Integration with leafwing input manager
 - [x] Minimal dependencies (including features)
 - [ ] No asset dependencies
