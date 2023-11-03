@@ -8,12 +8,12 @@ use bevy::{
 
 use crate::TouchStick;
 
-pub(crate) struct GamepadPlugin;
+pub(crate) struct GamepadMappingPlugin;
 
 /// Plugin that makes TouchSticks pretend to be regular bevy gamepads
 ///
 /// Add [`GamepadAxisMapping`] to a [`TouchStick`] to make it show up as a bevy gamepad.
-impl Plugin for GamepadPlugin {
+impl Plugin for GamepadMappingPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PreUpdate, (connect_gamepad, send_axis_events).chain());
     }

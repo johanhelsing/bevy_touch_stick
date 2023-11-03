@@ -10,8 +10,10 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/johanhelsing/bevy_touch_stick"
 
 [features]
-default = ["serde"]
+default = ["serde", "gamepad_mapping"]
 serde = ["dep:serde"]
+# integrate with bevy as a gamepad
+gamepad_mapping = []
 
 [dependencies]
 bevy = { version = "0.11", default-features = false, features = [
@@ -27,3 +29,7 @@ serde = { version = "^1", features = ["derive"], optional = true }
 bevy = "0.11"
 bevy-inspector-egui = "0.20"
 leafwing-input-manager = "0.10"
+
+[[example]]
+name = "leafwing"
+required-features = ["bevy_input"]
