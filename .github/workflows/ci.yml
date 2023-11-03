@@ -4,15 +4,9 @@ on:
   pull_request:
     branches:
       - main
-      - dev
   push:
     branches:
       - main
-    paths-ignore:
-      - "Makefile.toml"
-      - "README.md"
-      - "release.toml"
-      - "examples/**"
 
 jobs:
   clippy_check:
