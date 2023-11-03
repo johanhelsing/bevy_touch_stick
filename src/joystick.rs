@@ -73,6 +73,7 @@ pub struct TouchStickBundle<
     pub(crate) cursor_pos: RelativeCursorPosition,
 }
 
+// todo: deriving Default for this is a mistake
 /// bevy ui config for a stick
 #[derive(Component, Clone, Debug, Default, Reflect)]
 #[reflect(Component, Default)]

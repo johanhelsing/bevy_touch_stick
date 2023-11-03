@@ -26,3 +26,4 @@ serde = { version = "^1", features = ["derive"], optional = true }
 [dev-dependencies]
 bevy = "0.11"
 bevy-inspector-egui = "0.20"
+leafwing-input-manager = "0.10"

@@ -7,6 +7,8 @@ use bevy::{
 use std::{hash::Hash, marker::PhantomData};
 
 mod behavior;
+// todo: gate behind feature flag
+mod gamepad;
 mod input;
 mod joystick;
 
@@ -18,11 +20,13 @@ pub mod prelude {
 
 pub use crate::{
     behavior::TouchStickType,
+    gamepad::TouchStickGamepadMapping,
     joystick::{
         TintColor, TouchStick, TouchStickBundle, TouchStickInteractionArea, TouchStickNode,
     },
 };
 use crate::{
+    gamepad::GamepadPlugin,
     input::{update_input, update_sticks, update_sticks_from_mouse, DragEvent},
     joystick::extract_joystick_node,
 };
@@ -49,6 +53,7 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect 
             .register_type::<TouchStickEventType>()
             .add_event::<TouchStickEvent<S>>()
             .add_event::<DragEvent>()
+            .add_plugins(GamepadPlugin)
             .add_systems(PreUpdate, update_sticks.before(update_input::<S>))
             .add_systems(
                 PreUpdate,
