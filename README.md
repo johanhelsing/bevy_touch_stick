@@ -1,7 +1,9 @@
-# bevy_virtual_stick (work in progress)
+# `bevy_virtual_stick` (work in progress)
 
-Create and use a virtual touch screen joystick for the
-[Bevy](https://bevyengine.org/) game engine.
+Virtual touch screen analog joysticks for the [Bevy](https://bevyengine.org/)
+game engine.
+
+Only two-axis sticks are supported.
 
 ## Goals
 
