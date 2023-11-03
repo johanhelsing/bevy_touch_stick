@@ -96,14 +96,14 @@ pub struct TouchStickNode<S: Hash + Sync + Send + Clone + Default + Reflect + Fr
 #[derive(Component, Clone, Debug, Default, Reflect)]
 #[reflect(Component, Default)]
 pub struct TouchStick {
-    pub drag_id: Option<u64>,
-    pub dead_zone: f32,
-    pub base_position: Vec2,
-    pub start_position: Vec2,
-    pub current_position: Vec2,
+    pub(crate) drag_id: Option<u64>,
+    pub(crate) dead_zone: f32,
+    pub(crate) base_position: Vec2,
+    pub(crate) start_position: Vec2,
+    pub(crate) current_position: Vec2,
     /// Value with maximum magnitude 1
     pub value: Vec2,
-    pub interactable_zone: Rect,
+    pub(crate) interactable_zone: Rect,
 }
 
 impl<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static>

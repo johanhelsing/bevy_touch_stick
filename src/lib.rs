@@ -11,16 +11,20 @@ mod input;
 mod joystick;
 
 pub mod prelude {
-    pub use crate::{TouchStickBundle, TouchStickNode, TouchStickPlugin, TouchStickType};
+    pub use crate::{
+        TouchStick, TouchStickBundle, TouchStickNode, TouchStickPlugin, TouchStickType,
+    };
 }
 
 pub use crate::{
     behavior::TouchStickType,
-    joystick::{TintColor, TouchStickBundle, TouchStickInteractionArea, TouchStickNode},
+    joystick::{
+        TintColor, TouchStick, TouchStickBundle, TouchStickInteractionArea, TouchStickNode,
+    },
 };
 use crate::{
     input::{update_input, update_sticks, update_sticks_from_mouse, DragEvent},
-    joystick::{extract_joystick_node, TouchStick},
+    joystick::extract_joystick_node,
 };
 
 pub struct TouchStickPlugin<S> {

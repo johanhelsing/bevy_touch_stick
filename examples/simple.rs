@@ -87,15 +87,12 @@ fn update_stick_color(
 }
 
 fn move_player(
-    // todo: this should use a resource/component instead of events
-    mut stick_events: EventReader<TouchStickEvent<MyStick>>,
+    sticks: Query<&TouchStick>,
     mut players: Query<(&mut Transform, &Player)>,
     time: Res<Time>,
 ) {
     let (mut player_transform, player) = players.single_mut();
-
-    for event in stick_events.iter() {
-        let move_delta = event.value() * player.max_speed * time.delta_seconds();
-        player_transform.translation += move_delta.extend(0.);
-    }
+    let stick = sticks.single();
+    let move_delta = stick.value * player.max_speed * time.delta_seconds();
+    player_transform.translation += move_delta.extend(0.);
 }
