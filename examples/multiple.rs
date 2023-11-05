@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
+// use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_touch_stick::*;
 
 // ID for joysticks
@@ -14,7 +14,7 @@ fn main() {
     App::new()
         .add_plugins((
             DefaultPlugins,
-            WorldInspectorPlugin::new(),
+            // WorldInspectorPlugin::new(),
             TouchStickPlugin::<Stick>::default(),
         ))
         .add_systems(Startup, create_scene)
@@ -54,12 +54,9 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Spawn Virtual Joystick on left
     commands.spawn((
         TouchStickBundle::new(TouchStickNode {
-            border_image: asset_server.load("outline.png"),
-            knob_image: asset_server.load("knob.png"),
-            knob_size: Vec2::new(80., 80.),
-            dead_zone: 0.,
             id: Stick::Left,
             behavior: TouchStickType::Fixed,
+            ..default()
         })
         .set_color(TintColor(Color::WHITE.with_a(0.2)))
         .set_style(Style {
@@ -76,10 +73,6 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Spawn Virtual Joystick on Right
     commands.spawn((
         TouchStickBundle::new(TouchStickNode {
-            border_image: asset_server.load("outline.png"),
-            knob_image: asset_server.load("knob.png"),
-            knob_size: Vec2::new(80., 80.),
-            dead_zone: 0.,
             id: Stick::Right,
             behavior: TouchStickType::Fixed,
             ..default()
@@ -101,7 +94,7 @@ fn update_stick_colors(
     mut stick_events: EventReader<TouchStickEvent<Stick>>,
     mut sticks: Query<(&mut TintColor, &TouchStickNode<Stick>)>,
 ) {
-    for event in stick_events.iter() {
+    for event in stick_events.read() {
         let tint_color = match event.get_type() {
             TouchStickEventType::Press | TouchStickEventType::Drag => TintColor(Color::WHITE),
             TouchStickEventType::Release => TintColor(Color::WHITE.with_a(0.2)),
@@ -119,22 +112,22 @@ fn move_player(
     // todo: don't use events
     mut stick_events: EventReader<TouchStickEvent<Stick>>,
     mut players: Query<(&mut Transform, &Player)>,
-    time_step: Res<FixedTime>,
+    time: Res<Time>,
 ) {
     let (mut player_transform, player) = players.single_mut();
 
-    for event in stick_events.iter() {
+    for event in stick_events.read() {
         let Vec2 { x, y } = event.value();
+
+        let dt = time.delta_seconds();
 
         // todo: maybe it's more interesting to set player direction per stick instead?
         match event.id() {
             Stick::Left => {
-                player_transform.translation.x +=
-                    x * player.max_speed * time_step.period.as_secs_f32();
+                player_transform.translation.x += x * player.max_speed * dt;
             }
             Stick::Right => {
-                player_transform.translation.y +=
-                    y * player.max_speed * time_step.period.as_secs_f32();
+                player_transform.translation.y += y * player.max_speed * dt;
             }
         }
     }

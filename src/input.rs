@@ -85,7 +85,7 @@ pub(crate) fn update_input<
     }
 }
 
-pub(crate) fn update_sticks(
+pub(crate) fn update_sticks_from_touch(
     mut touch_events: EventReader<TouchInput>,
     mut send_values: EventWriter<DragEvent>,
 ) {

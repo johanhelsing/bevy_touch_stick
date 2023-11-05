@@ -26,7 +26,7 @@ struct Player {
     max_speed: f32,
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup(mut commands: Commands) {
     commands.spawn(Camera2dBundle {
         transform: Transform::from_xyz(0., 0., 5.0),
         ..default()
@@ -46,14 +46,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // spawn a touch stick
     commands.spawn((
-        TouchStickBundle::new(TouchStickNode::<MyStick> {
-            border_image: asset_server.load("outline.png"),
-            knob_image: asset_server.load("knob.png"),
-            knob_size: Vec2::splat(80.),
-            ..default()
-        })
-        .set_color(TintColor(Color::WHITE.with_a(0.2)))
-        .set_style(Style {
+        TouchStickBundle::new(TouchStickNode::<MyStick>::default()).set_style(Style {
             width: Val::Px(150.),
             height: Val::Px(150.),
             position_type: PositionType::Absolute,

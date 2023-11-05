@@ -1,9 +1,5 @@
-use bevy::{
-    prelude::*,
-    reflect::TypePath,
-    render::RenderApp,
-    ui::{RenderUiSystem, UiSystem},
-};
+use bevy::{prelude::*, reflect::TypePath, ui::UiSystem};
+use joystick::update_stick_ui;
 use std::{hash::Hash, marker::PhantomData};
 
 mod behavior;
@@ -22,13 +18,10 @@ pub mod prelude {
 use crate::gamepad::GamepadMappingPlugin;
 #[cfg(feature = "gamepad_mapping")]
 pub use crate::gamepad::TouchStickGamepadMapping;
+use crate::input::{update_input, update_sticks_from_mouse, update_sticks_from_touch, DragEvent};
 pub use crate::{
     behavior::TouchStickType,
     joystick::{TintColor, TouchStickBundle, TouchStickInteractionArea, TouchStickNode},
-};
-use crate::{
-    input::{update_input, update_sticks, update_sticks_from_mouse, DragEvent},
-    joystick::extract_joystick_node,
 };
 
 /// pure data, independent of bevy_ui
@@ -68,28 +61,23 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect 
             .register_type::<TouchStickEventType>()
             .add_event::<TouchStickEvent<S>>()
             .add_event::<DragEvent>()
-            .add_systems(PreUpdate, update_sticks.before(update_input::<S>))
             .add_systems(
                 PreUpdate,
-                update_sticks_from_mouse.before(update_input::<S>),
+                (
+                    // todo: resolve ambiguity
+                    update_sticks_from_touch.before(update_input::<S>),
+                    update_sticks_from_mouse.before(update_input::<S>),
+                ),
             )
             .add_systems(PreUpdate, update_input::<S>)
             .add_systems(
                 PostUpdate,
                 map_input_zones_from_ui_nodes::<S>.before(UiSystem::Layout),
-            );
+            )
+            .add_systems(Update, update_stick_ui);
 
         #[cfg(feature = "gamepad_mapping")]
         app.add_plugins(GamepadMappingPlugin);
-
-        let render_app = match app.get_sub_app_mut(RenderApp) {
-            Ok(render_app) => render_app,
-            Err(_) => return,
-        };
-        render_app.add_systems(
-            ExtractSchedule,
-            extract_joystick_node::<S>.after(RenderUiSystem::ExtractNode),
-        );
     }
 }
 
@@ -97,21 +85,21 @@ fn map_input_zones_from_ui_nodes<
     S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static,
 >(
     interaction_areas: Query<(&Node, With<TouchStickInteractionArea>)>,
-    mut sticks: Query<(&Transform, &TouchStickNode<S>, &mut TouchStick)>,
+    mut sticks: Query<(&Transform, &mut TouchStick)>,
 ) {
     // todo: this looks like a giant hack
+    // should map based on ids!
     let interaction_areas = interaction_areas
         .iter()
         .map(|(node, _)| node.size())
         .collect::<Vec<Vec2>>();
 
-    for (i, (stick_transform, stick_node, mut stick)) in sticks.iter_mut().enumerate() {
+    for (i, (stick_transform, mut stick)) in sticks.iter_mut().enumerate() {
         let j_pos = stick_transform.translation.truncate();
         let Some(size) = interaction_areas.get(i) else {
             return;
         };
         let interaction_area = Rect::from_center_size(j_pos, *size);
-        stick.dead_zone = stick_node.dead_zone;
         stick.interactable_zone = interaction_area;
     }
 }

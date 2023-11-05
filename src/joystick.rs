@@ -1,11 +1,7 @@
 use crate::{TouchStick, TouchStickType};
 use bevy::{
     prelude::*,
-    render::Extract,
-    ui::{
-        ContentSize, ExtractedUiNode, ExtractedUiNodes, FocusPolicy, RelativeCursorPosition,
-        UiStack,
-    },
+    ui::{ContentSize, FocusPolicy, RelativeCursorPosition},
 };
 use std::hash::Hash;
 
@@ -53,7 +49,6 @@ pub struct TouchStickBundle<
     pub(crate) calculated_size: ContentSize,
     /// The tint color of the image
     pub(crate) color: TintColor,
-    /// The texture atlas image of the node
     pub(crate) joystick: TouchStickNode<S>,
     /// Whether this node should block interaction with lower nodes
     pub(crate) focus_policy: FocusPolicy,
@@ -69,7 +64,7 @@ pub struct TouchStickBundle<
     pub view_visibility: ViewVisibility,
     /// Indicates the depth at which the node should appear in the UI
     pub(crate) z_index: ZIndex,
-    pub(crate) knob_data: TouchStick,
+    pub(crate) stick: TouchStick,
     pub(crate) cursor_pos: RelativeCursorPosition,
 }
 
@@ -81,14 +76,10 @@ pub struct TouchStickNode<S: Hash + Sync + Send + Clone + Default + Reflect + Fr
 {
     /// Identifier of joystick
     pub id: S,
-    /// Image for background or border image on joystick
-    pub border_image: Handle<Image>,
-    /// Image for handler knob on joystick
-    pub knob_image: Handle<Image>,
-    /// Size for knob on joystick
-    pub knob_size: Vec2,
-    /// Radius of zone to ignore movement
-    pub dead_zone: f32,
+    /// Radius for knob on joystick
+    pub knob_radius: f32,
+    /// Radius for ring around the stick knob
+    pub outline_radius: f32,
     /// Define the behavior of joystick
     pub behavior: TouchStickType,
 }
@@ -144,117 +135,119 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static>
     }
 }
 
-#[allow(clippy::type_complexity)]
-pub fn extract_joystick_node<
-    S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static,
->(
-    mut extracted_uinodes: ResMut<ExtractedUiNodes>,
-    images: Extract<Res<Assets<Image>>>,
-    ui_stack: Extract<Res<UiStack>>,
-    uinode_query: Extract<
-        Query<(
-            Entity,
-            &Node,
-            &GlobalTransform,
-            &TintColor,
-            &TouchStickNode<S>,
-            &ViewVisibility,
-            &TouchStick,
-        )>,
-    >,
-) {
-    for (stack_index, entity) in ui_stack.uinodes.iter().enumerate() {
-        let stack_index = stack_index as u32;
+pub(crate) fn update_stick_ui() {}
 
-        if let Ok((entity, uinode, global_transform, color, joystick_node, visibility, data)) =
-            uinode_query.get(*entity)
-        {
-            if !visibility.get()
-                || uinode.size().x == 0.
-                || uinode.size().y == 0.
-                || color.0.a() == 0.0
-                || !images.contains(&joystick_node.border_image)
-                || !images.contains(&joystick_node.knob_image)
-                || data.drag_id.is_none() && joystick_node.behavior == TouchStickType::Dynamic
-            {
-                continue;
-            }
-            let container_rect = Rect {
-                max: uinode.size(),
-                ..default()
-            };
+// #[allow(clippy::type_complexity)]
+// pub fn extract_joystick_node<
+//     S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static,
+// >(
+//     mut extracted_uinodes: ResMut<ExtractedUiNodes>,
+//     images: Extract<Res<Assets<Image>>>,
+//     ui_stack: Extract<Res<UiStack>>,
+//     uinode_query: Extract<
+//         Query<(
+//             Entity,
+//             &Node,
+//             &GlobalTransform,
+//             &TintColor,
+//             &TouchStickNode<S>,
+//             &ViewVisibility,
+//             &TouchStick,
+//         )>,
+//     >,
+// ) {
+//     for (stack_index, entity) in ui_stack.uinodes.iter().enumerate() {
+//         let stack_index = stack_index as u32;
 
-            let border_pos = match joystick_node.behavior {
-                TouchStickType::Fixed => global_transform
-                    .compute_matrix()
-                    .transform_point3((container_rect.center() - (uinode.size() / 2.)).extend(0.)),
-                TouchStickType::Floating => {
-                    if data.drag_id.is_none() {
-                        global_transform.compute_matrix().transform_point3(
-                            (container_rect.center() - (uinode.size() / 2.)).extend(0.),
-                        )
-                    } else {
-                        data.start_position.extend(0.)
-                    }
-                }
-                TouchStickType::Dynamic => data.base_position.extend(0.),
-            };
+//         if let Ok((entity, uinode, global_transform, color, joystick_node, visibility, data)) =
+//             uinode_query.get(*entity)
+//         {
+//             if !visibility.get()
+//                 || uinode.size().x == 0.
+//                 || uinode.size().y == 0.
+//                 || color.0.a() == 0.0
+//                 || !images.contains(&joystick_node.border_image)
+//                 || !images.contains(&joystick_node.knob_image)
+//                 || data.drag_id.is_none() && joystick_node.behavior == TouchStickType::Dynamic
+//             {
+//                 continue;
+//             }
+//             let container_rect = Rect {
+//                 max: uinode.size(),
+//                 ..default()
+//             };
 
-            extracted_uinodes.uinodes.insert(
-                entity,
-                ExtractedUiNode {
-                    stack_index,
-                    transform: Mat4::from_translation(border_pos),
-                    color: color.0,
-                    rect: container_rect,
-                    image: joystick_node.border_image.id(),
-                    atlas_size: None,
-                    clip: None,
-                    flip_x: false,
-                    flip_y: false,
-                },
-            );
+//             let border_pos = match joystick_node.behavior {
+//                 TouchStickType::Fixed => global_transform
+//                     .compute_matrix()
+//                     .transform_point3((container_rect.center() - (uinode.size() / 2.)).extend(0.)),
+//                 TouchStickType::Floating => {
+//                     if data.drag_id.is_none() {
+//                         global_transform.compute_matrix().transform_point3(
+//                             (container_rect.center() - (uinode.size() / 2.)).extend(0.),
+//                         )
+//                     } else {
+//                         data.start_position.extend(0.)
+//                     }
+//                 }
+//                 TouchStickType::Dynamic => data.base_position.extend(0.),
+//             };
 
-            let rect = Rect {
-                max: joystick_node.knob_size,
-                ..default()
-            };
+//             extracted_uinodes.uinodes.insert(
+//                 entity,
+//                 ExtractedUiNode {
+//                     stack_index,
+//                     transform: Mat4::from_translation(border_pos),
+//                     color: color.0,
+//                     rect: container_rect,
+//                     image: joystick_node.border_image.id(),
+//                     atlas_size: None,
+//                     clip: None,
+//                     flip_x: false,
+//                     flip_y: false,
+//                 },
+//             );
 
-            let radius = uinode.size().x / 2.;
-            let axis_value = data.value;
-            // ui is y down, so we flip
-            let pos = Vec2::new(axis_value.x, -axis_value.y) * radius;
+//             let rect = Rect {
+//                 max: joystick_node.knob_size,
+//                 ..default()
+//             };
 
-            let knob_pos = match joystick_node.behavior {
-                TouchStickType::Fixed => global_transform.compute_matrix().transform_point3(
-                    (container_rect.center() - (uinode.size() / 2.) + pos).extend(0.),
-                ),
-                TouchStickType::Floating => {
-                    if data.drag_id.is_none() {
-                        global_transform.compute_matrix().transform_point3(
-                            (container_rect.center() - (uinode.size() / 2.)).extend(0.),
-                        )
-                    } else {
-                        (data.start_position + pos).extend(0.)
-                    }
-                }
-                TouchStickType::Dynamic => (data.base_position + pos).extend(0.),
-            };
+//             let radius = uinode.size().x / 2.;
+//             let axis_value = data.value;
+//             // ui is y down, so we flip
+//             let pos = Vec2::new(axis_value.x, -axis_value.y) * radius;
 
-            extracted_uinodes.uinodes.insert(
-                entity,
-                ExtractedUiNode {
-                    rect,
-                    stack_index,
-                    transform: Mat4::from_translation(knob_pos),
-                    color: color.0,
-                    image: joystick_node.knob_image.id(),
-                    atlas_size: None,
-                    clip: None,
-                    flip_x: false,
-                    flip_y: false,
-                },
-            );
-        }
-    }
-}
+//             let knob_pos = match joystick_node.behavior {
+//                 TouchStickType::Fixed => global_transform.compute_matrix().transform_point3(
+//                     (container_rect.center() - (uinode.size() / 2.) + pos).extend(0.),
+//                 ),
+//                 TouchStickType::Floating => {
+//                     if data.drag_id.is_none() {
+//                         global_transform.compute_matrix().transform_point3(
+//                             (container_rect.center() - (uinode.size() / 2.)).extend(0.),
+//                         )
+//                     } else {
+//                         (data.start_position + pos).extend(0.)
+//                     }
+//                 }
+//                 TouchStickType::Dynamic => (data.base_position + pos).extend(0.),
+//             };
+
+//             extracted_uinodes.uinodes.insert(
+//                 entity,
+//                 ExtractedUiNode {
+//                     rect,
+//                     stack_index,
+//                     transform: Mat4::from_translation(knob_pos),
+//                     color: color.0,
+//                     image: joystick_node.knob_image.id(),
+//                     atlas_size: None,
+//                     clip: None,
+//                     flip_x: false,
+//                     flip_y: false,
+//                 },
+//             );
+//         }
+//     }
+// }
