@@ -18,7 +18,10 @@ pub mod prelude {
 use crate::gamepad::GamepadMappingPlugin;
 #[cfg(feature = "gamepad_mapping")]
 pub use crate::gamepad::TouchStickGamepadMapping;
-use crate::input::{update_input, update_sticks_from_mouse, update_sticks_from_touch, DragEvent};
+use crate::input::{
+    send_drag_events_from_mouse, send_drag_events_from_touch, update_sticks_from_drag_events,
+    DragEvent,
+};
 pub use crate::{
     behavior::TouchStickType,
     joystick::{TouchStickBundle, TouchStickInteractionArea, TouchStickNode},
@@ -85,11 +88,11 @@ impl<S: StickIdType> Plugin for TouchStickPlugin<S> {
                 PreUpdate,
                 (
                     // todo: resolve ambiguity
-                    update_sticks_from_touch.before(update_input::<S>),
-                    update_sticks_from_mouse.before(update_input::<S>),
+                    send_drag_events_from_touch.before(update_sticks_from_drag_events::<S>),
+                    send_drag_events_from_mouse.before(update_sticks_from_drag_events::<S>),
                 ),
             )
-            .add_systems(PreUpdate, update_input::<S>)
+            .add_systems(PreUpdate, update_sticks_from_drag_events::<S>)
             .add_systems(
                 PostUpdate,
                 map_input_zones_from_ui_nodes::<S>.before(UiSystem::Layout),

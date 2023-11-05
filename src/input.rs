@@ -14,7 +14,7 @@ pub(crate) enum DragEvent {
     End { id: u64 },
 }
 
-pub(crate) fn update_input<S: StickIdType>(
+pub(crate) fn update_sticks_from_drag_events<S: StickIdType>(
     mut drag_events: EventReader<DragEvent>,
     mut stick_events: EventWriter<TouchStickEvent<S>>,
     mut sticks: Query<(&TouchStickNode<S>, &mut TouchStick<S>)>,
@@ -83,7 +83,7 @@ pub(crate) fn update_input<S: StickIdType>(
     }
 }
 
-pub(crate) fn update_sticks_from_touch(
+pub(crate) fn send_drag_events_from_touch(
     mut touch_events: EventReader<TouchInput>,
     mut send_values: EventWriter<DragEvent>,
 ) {
@@ -113,7 +113,7 @@ pub(crate) fn update_sticks_from_touch(
     }
 }
 
-pub(crate) fn update_sticks_from_mouse(
+pub(crate) fn send_drag_events_from_mouse(
     mouse_buttons: Res<Input<MouseButton>>,
     mut mouse_events: EventReader<MouseButtonInput>,
     mut drag_events: EventWriter<DragEvent>,
