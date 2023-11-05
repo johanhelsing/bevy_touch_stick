@@ -14,6 +14,8 @@ pub mod prelude {
     pub use crate::{
         TouchStick, TouchStickPlugin, TouchStickType, TouchStickUi, TouchStickUiBundle,
     };
+    // todo: remove this?
+    pub use crate::ui::CircleMaterial;
 }
 
 #[cfg(feature = "gamepad_mapping")]

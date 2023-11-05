@@ -26,7 +26,7 @@ struct Player {
     max_speed: f32,
 }
 
-fn setup(mut commands: Commands) {
+fn setup(mut commands: Commands, mut materials: ResMut<Assets<CircleMaterial>>) {
     commands.spawn(Camera2dBundle {
         transform: Transform::from_xyz(0., 0., 5.0),
         ..default()
@@ -46,6 +46,10 @@ fn setup(mut commands: Commands) {
 
     // spawn a touch stick
     commands.spawn(TouchStickUiBundle::<MyStick> {
+        // todo: provide default material
+        material: materials.add(CircleMaterial {
+            color: Vec4::new(1., 0., 0., 1.),
+        }),
         style: Style {
             width: Val::Px(150.),
             height: Val::Px(150.),

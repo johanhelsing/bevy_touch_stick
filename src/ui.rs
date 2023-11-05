@@ -60,7 +60,7 @@ pub struct TouchStickUi<S: Hash + Sync + Send + Clone + Default + Reflect + From
 #[derive(AsBindGroup, Asset, TypePath, Debug, Clone)]
 pub struct CircleMaterial {
     #[uniform(0)]
-    color: Vec4,
+    pub color: Vec4,
 }
 
 impl UiMaterial for CircleMaterial {
