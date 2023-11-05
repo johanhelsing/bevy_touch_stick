@@ -25,7 +25,7 @@ pub(crate) fn update_input<
     mut stick_events: EventWriter<TouchStickEvent<S>>,
     mut sticks: Query<(&TouchStickNode<S>, &mut TouchStick)>,
 ) {
-    let input_events = drag_events.iter().collect::<Vec<&DragEvent>>();
+    let input_events = drag_events.read().collect::<Vec<&DragEvent>>();
 
     for (node, mut knob) in sticks.iter_mut() {
         for event in &input_events {
@@ -94,7 +94,7 @@ pub(crate) fn update_sticks(
     mut send_values: EventWriter<DragEvent>,
 ) {
     let touches = touch_events
-        .iter()
+        .read()
         .map(|e| (e.id, e.phase, e.position))
         .collect::<Vec<(u64, TouchPhase, Vec2)>>();
 
@@ -128,7 +128,7 @@ pub(crate) fn update_sticks_from_mouse(
     let primary_window = primary_window.single();
     let position = primary_window.cursor_position().unwrap_or(Vec2::ZERO);
 
-    for mouse_event in mouse_events.iter() {
+    for mouse_event in mouse_events.read() {
         if mouse_event.button == MouseButton::Left && mouse_event.state == ButtonState::Released {
             drag_events.send(DragEvent::End { id: 0 });
         }

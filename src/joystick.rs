@@ -63,10 +63,12 @@ pub struct TouchStickBundle<
     pub(crate) transform: Transform,
     /// The global transform of the node
     pub(crate) global_transform: GlobalTransform,
-    /// Describes the visibility properties of the node
-    pub(crate) visibility: Visibility,
-    /// Algorithmically-computed indication of whether an entity is visible and should be extracted for rendering
-    pub(crate) computed_visibility: ComputedVisibility,
+    /// The visibility of the entity.
+    pub visibility: Visibility,
+    /// The inherited visibility of the entity.
+    pub inherited_visibility: InheritedVisibility,
+    /// The view visibility of the entity.
+    pub view_visibility: ViewVisibility,
     /// Indicates the depth at which the node should appear in the UI
     pub(crate) z_index: ZIndex,
     pub(crate) knob_data: TouchStick,
@@ -152,11 +154,6 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static>
         self
     }
 
-    pub fn set_computed_visibility(mut self, computed_visibility: ComputedVisibility) -> Self {
-        self.computed_visibility = computed_visibility;
-        self
-    }
-
     pub fn set_z_index(mut self, z_index: ZIndex) -> Self {
         self.z_index = z_index;
         self
@@ -172,20 +169,23 @@ pub fn extract_joystick_node<
     ui_stack: Extract<Res<UiStack>>,
     uinode_query: Extract<
         Query<(
+            Entity,
             &Node,
             &GlobalTransform,
             &TintColor,
             &TouchStickNode<S>,
-            &ComputedVisibility,
+            &ViewVisibility,
             &TouchStick,
         )>,
     >,
 ) {
     for (stack_index, entity) in ui_stack.uinodes.iter().enumerate() {
-        if let Ok((uinode, global_transform, color, joystick_node, visibility, data)) =
+        let stack_index = stack_index as u32;
+
+        if let Ok((entity, uinode, global_transform, color, joystick_node, visibility, data)) =
             uinode_query.get(*entity)
         {
-            if !visibility.is_visible()
+            if !visibility.get()
                 || uinode.size().x == 0.
                 || uinode.size().y == 0.
                 || color.0.a() == 0.0
@@ -216,17 +216,20 @@ pub fn extract_joystick_node<
                 TouchStickType::Dynamic => data.base_position.extend(0.),
             };
 
-            extracted_uinodes.uinodes.push(ExtractedUiNode {
-                stack_index,
-                transform: Mat4::from_translation(border_pos),
-                color: color.0,
-                rect: container_rect,
-                image: joystick_node.border_image.clone(),
-                atlas_size: None,
-                clip: None,
-                flip_x: false,
-                flip_y: false,
-            });
+            extracted_uinodes.uinodes.insert(
+                entity,
+                ExtractedUiNode {
+                    stack_index,
+                    transform: Mat4::from_translation(border_pos),
+                    color: color.0,
+                    rect: container_rect,
+                    image: joystick_node.border_image.id(),
+                    atlas_size: None,
+                    clip: None,
+                    flip_x: false,
+                    flip_y: false,
+                },
+            );
 
             let rect = Rect {
                 max: joystick_node.knob_size,
@@ -254,17 +257,20 @@ pub fn extract_joystick_node<
                 TouchStickType::Dynamic => (data.base_position + pos).extend(0.),
             };
 
-            extracted_uinodes.uinodes.push(ExtractedUiNode {
-                rect,
-                stack_index,
-                transform: Mat4::from_translation(knob_pos),
-                color: color.0,
-                image: joystick_node.knob_image.clone(),
-                atlas_size: None,
-                clip: None,
-                flip_x: false,
-                flip_y: false,
-            });
+            extracted_uinodes.uinodes.insert(
+                entity,
+                ExtractedUiNode {
+                    rect,
+                    stack_index,
+                    transform: Mat4::from_translation(knob_pos),
+                    color: color.0,
+                    image: joystick_node.knob_image.id(),
+                    atlas_size: None,
+                    clip: None,
+                    flip_x: false,
+                    flip_y: false,
+                },
+            );
         }
     }
 }

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
+// use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_touch_stick::{prelude::*, TintColor, TouchStickEvent, TouchStickEventType};
 
 /// Marker type for our touch stick
@@ -12,7 +12,7 @@ fn main() {
         .add_plugins((
             DefaultPlugins,
             // add an inspector for easily changing settings at runtime
-            WorldInspectorPlugin::default(),
+            // WorldInspectorPlugin::default(),
             // add the plugin
             TouchStickPlugin::<MyStick>::default(),
         ))
@@ -70,7 +70,7 @@ fn update_stick_color(
     mut stick_events: EventReader<TouchStickEvent<MyStick>>,
     mut sticks: Query<(&mut TintColor, &TouchStickNode<MyStick>)>,
 ) {
-    for event in stick_events.iter() {
+    for event in stick_events.read() {
         let tint_color = match event.get_type() {
             TouchStickEventType::Press | TouchStickEventType::Drag => TintColor(Color::WHITE),
             TouchStickEventType::Release => TintColor(Color::WHITE.with_a(0.2)),
