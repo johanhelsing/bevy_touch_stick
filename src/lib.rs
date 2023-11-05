@@ -21,22 +21,45 @@ pub use crate::gamepad::TouchStickGamepadMapping;
 use crate::input::{update_input, update_sticks_from_mouse, update_sticks_from_touch, DragEvent};
 pub use crate::{
     behavior::TouchStickType,
-    joystick::{TintColor, TouchStickBundle, TouchStickInteractionArea, TouchStickNode},
+    joystick::{TouchStickBundle, TouchStickInteractionArea, TouchStickNode},
 };
 
 /// pure data, independent of bevy_ui
 #[derive(Component, Clone, Debug, Default, Reflect)]
 #[reflect(Component, Default)]
-pub struct TouchStick {
-    pub(crate) drag_id: Option<u64>,
-    pub(crate) dead_zone: f32,
-    pub(crate) base_position: Vec2,
-    pub(crate) start_position: Vec2,
-    pub(crate) current_position: Vec2,
+pub struct TouchStick<S: StickIdType> {
+    pub id: S,
+    pub drag_id: Option<u64>,
+    pub dead_zone: f32,
+    pub base_position: Vec2,
+    pub start_position: Vec2,
+    pub current_position: Vec2,
     /// Value with maximum magnitude 1
     pub value: Vec2,
     /// In input space (y-down)
-    pub(crate) interactable_zone: Rect,
+    pub interactable_zone: Rect,
+    /// Define the behavior of joystick
+    pub stick_type: TouchStickType,
+}
+
+impl<S: StickIdType> TouchStick<S> {
+    pub fn new(id: S) -> Self {
+        Self {
+            id: id.into(),
+            // drag_id: None,
+            // dead_zone: 0.,
+            // base_position: default(),
+            // start_position: default(),
+            // current_position: default(),
+            // value: default(),
+            // interactable_zone: Rect {
+            //     min: Vec2::MIN,
+            //     max: Vec2::MAX,
+            // },
+            // stick_type: default(),
+            ..default()
+        }
+    }
 }
 
 pub struct TouchStickPlugin<S> {
@@ -49,14 +72,11 @@ impl<S> Default for TouchStickPlugin<S> {
     }
 }
 
-impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect + 'static> Plugin
-    for TouchStickPlugin<S>
-{
+impl<S: StickIdType> Plugin for TouchStickPlugin<S> {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.register_type::<TintColor>()
-            .register_type::<TouchStickInteractionArea>()
+        app.register_type::<TouchStickInteractionArea>()
             .register_type::<TouchStickNode<S>>()
-            .register_type::<TouchStick>()
+            .register_type::<TouchStick<S>>()
             .register_type::<TouchStickType>()
             .register_type::<TouchStickEventType>()
             .add_event::<TouchStickEvent<S>>()
@@ -77,15 +97,23 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + FromReflect 
             .add_systems(Update, update_stick_ui);
 
         #[cfg(feature = "gamepad_mapping")]
-        app.add_plugins(GamepadMappingPlugin);
+        app.add_plugins(GamepadMappingPlugin::<S>::default());
     }
 }
 
-fn map_input_zones_from_ui_nodes<
-    S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static,
->(
+pub trait StickIdType:
+    Hash + Sync + Send + Clone + Default + Reflect + FromReflect + TypePath + 'static
+{
+}
+
+impl<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + TypePath + 'static>
+    StickIdType for S
+{
+}
+
+fn map_input_zones_from_ui_nodes<S: StickIdType>(
     interaction_areas: Query<(&Node, With<TouchStickInteractionArea>)>,
-    mut sticks: Query<(&Transform, &mut TouchStick)>,
+    mut sticks: Query<(&Transform, &mut TouchStick<S>)>,
 ) {
     // todo: this looks like a giant hack
     // should map based on ids!
@@ -113,13 +141,13 @@ pub enum TouchStickEventType {
 }
 
 #[derive(Event)]
-pub struct TouchStickEvent<S: Hash + Sync + Send + Clone + Default + Reflect + 'static + TypePath> {
+pub struct TouchStickEvent<S: StickIdType> {
     id: S,
     event: TouchStickEventType,
     value: Vec2,
 }
 
-impl<S: Hash + Sync + Send + Clone + Default + Reflect + TypePath + 'static> TouchStickEvent<S> {
+impl<S: StickIdType> TouchStickEvent<S> {
     /// Get Id of joystick throw event
     pub fn id(&self) -> S {
         self.id.clone()

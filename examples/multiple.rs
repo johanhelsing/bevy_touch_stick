@@ -18,7 +18,7 @@ fn main() {
             TouchStickPlugin::<Stick>::default(),
         ))
         .add_systems(Startup, create_scene)
-        .add_systems(Update, (move_player, update_stick_colors))
+        .add_systems(Update, move_player)
         .run();
 }
 
@@ -52,60 +52,36 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 
     // Spawn Virtual Joystick on left
-    commands.spawn((
-        TouchStickBundle::new(TouchStickNode {
+    commands.spawn(TouchStickBundle {
+        stick: TouchStick {
             id: Stick::Left,
-            behavior: TouchStickType::Fixed,
+            stick_type: TouchStickType::Fixed,
             ..default()
-        })
-        .set_color(TintColor(Color::WHITE.with_a(0.2)))
-        .set_style(Style {
+        },
+        style: Style {
             width: Val::Px(150.),
             height: Val::Px(150.),
             position_type: PositionType::Absolute,
             left: Val::Px(35.),
             bottom: Val::Percent(15.),
             ..default()
-        }),
-        BackgroundColor(Color::ORANGE_RED.with_a(0.2)),
-    ));
+        },
+        ..default()
+    });
 
     // Spawn Virtual Joystick on Right
-    commands.spawn((
-        TouchStickBundle::new(TouchStickNode {
-            id: Stick::Right,
-            behavior: TouchStickType::Fixed,
-            ..default()
-        })
-        .set_color(TintColor(Color::WHITE.with_a(0.2)))
-        .set_style(Style {
+    commands.spawn(TouchStickBundle {
+        stick: TouchStick::new(Stick::Right),
+        style: Style {
             width: Val::Px(150.),
             height: Val::Px(150.),
             position_type: PositionType::Absolute,
             right: Val::Px(35.),
             bottom: Val::Percent(15.),
             ..default()
-        }),
-        BackgroundColor(Color::ORANGE_RED.with_a(0.2)),
-    ));
-}
-
-fn update_stick_colors(
-    mut stick_events: EventReader<TouchStickEvent<Stick>>,
-    mut sticks: Query<(&mut TintColor, &TouchStickNode<Stick>)>,
-) {
-    for event in stick_events.read() {
-        let tint_color = match event.get_type() {
-            TouchStickEventType::Press | TouchStickEventType::Drag => TintColor(Color::WHITE),
-            TouchStickEventType::Release => TintColor(Color::WHITE.with_a(0.2)),
-        };
-
-        for (mut color, node) in &mut sticks {
-            if node.id == event.id() {
-                *color = tint_color;
-            }
-        }
-    }
+        },
+        ..default()
+    });
 }
 
 fn move_player(

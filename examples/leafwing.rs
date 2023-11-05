@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 // use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_touch_stick::{
-    prelude::*, TintColor, TouchStickEvent, TouchStickEventType, TouchStickGamepadMapping,
-};
+use bevy_touch_stick::{prelude::*, TouchStickGamepadMapping};
 use leafwing_input_manager::prelude::*;
 
 /// Marker type for our touch stick
@@ -27,7 +25,7 @@ fn main() {
             InputManagerPlugin::<Action>::default(),
         ))
         .add_systems(Startup, setup)
-        .add_systems(Update, (update_stick_color, move_player))
+        .add_systems(Update, move_player)
         .run();
 }
 
@@ -67,37 +65,20 @@ fn setup(mut commands: Commands) {
         // map this stick as a left gamepad stick (through bevy_input)
         // leafwing will register this as a normal gamepad
         TouchStickGamepadMapping::LEFT_STICK,
-        TouchStickBundle::new(TouchStickNode::<MyStick>::default())
+        TouchStickBundle {
+            stick: TouchStick::<MyStick>::default(),
             // configure the interactable area through bevy_ui
-            .set_style(Style {
+            style: Style {
                 width: Val::Px(150.),
                 height: Val::Px(150.),
                 position_type: PositionType::Absolute,
                 left: Val::Percent(50.),
                 bottom: Val::Percent(15.),
                 ..default()
-            }),
-        // make it easy to see the area in which the stick can be interacted with
-        BackgroundColor(Color::WHITE.with_a(0.05)),
+            },
+            ..default()
+        },
     ));
-}
-
-fn update_stick_color(
-    mut stick_events: EventReader<TouchStickEvent<MyStick>>,
-    mut sticks: Query<(&mut TintColor, &TouchStickNode<MyStick>)>,
-) {
-    for event in stick_events.read() {
-        let tint_color = match event.get_type() {
-            TouchStickEventType::Press | TouchStickEventType::Drag => TintColor(Color::WHITE),
-            TouchStickEventType::Release => TintColor(Color::WHITE.with_a(0.2)),
-        };
-
-        for (mut color, node) in &mut sticks {
-            if node.id == event.id() {
-                *color = tint_color;
-            }
-        }
-    }
 }
 
 fn move_player(

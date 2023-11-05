@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 // use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_touch_stick::{prelude::*, TintColor, TouchStickEvent, TouchStickEventType};
+use bevy_touch_stick::prelude::*;
 
 /// Marker type for our touch stick
 #[derive(Default, Reflect, Hash, Clone, PartialEq, Eq)]
@@ -17,7 +17,7 @@ fn main() {
             TouchStickPlugin::<MyStick>::default(),
         ))
         .add_systems(Startup, setup)
-        .add_systems(Update, (update_stick_color, move_player))
+        .add_systems(Update, move_player)
         .run();
 }
 
@@ -45,40 +45,21 @@ fn setup(mut commands: Commands) {
     ));
 
     // spawn a touch stick
-    commands.spawn((
-        TouchStickBundle::new(TouchStickNode::<MyStick>::default()).set_style(Style {
+    commands.spawn(TouchStickBundle::<MyStick> {
+        style: Style {
             width: Val::Px(150.),
             height: Val::Px(150.),
             position_type: PositionType::Absolute,
             left: Val::Percent(50.),
             bottom: Val::Percent(15.),
             ..default()
-        }),
-        // make it easy to see the area in which the stick can be interacted with
-        BackgroundColor(Color::WHITE.with_a(0.05)),
-    ));
-}
-
-fn update_stick_color(
-    mut stick_events: EventReader<TouchStickEvent<MyStick>>,
-    mut sticks: Query<(&mut TintColor, &TouchStickNode<MyStick>)>,
-) {
-    for event in stick_events.read() {
-        let tint_color = match event.get_type() {
-            TouchStickEventType::Press | TouchStickEventType::Drag => TintColor(Color::WHITE),
-            TouchStickEventType::Release => TintColor(Color::WHITE.with_a(0.2)),
-        };
-
-        for (mut color, node) in &mut sticks {
-            if node.id == event.id() {
-                *color = tint_color;
-            }
-        }
-    }
+        },
+        ..default()
+    });
 }
 
 fn move_player(
-    sticks: Query<&TouchStick>,
+    sticks: Query<&TouchStick<MyStick>>,
     mut players: Query<(&mut Transform, &Player)>,
     time: Res<Time>,
 ) {

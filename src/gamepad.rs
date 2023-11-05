@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use bevy::{
     input::gamepad::{
         GamepadAxisChangedEvent, GamepadConnection, GamepadConnectionEvent, GamepadEvent,
@@ -6,16 +8,27 @@ use bevy::{
     prelude::*,
 };
 
-use crate::TouchStick;
+use crate::{StickIdType, TouchStick};
 
-pub(crate) struct GamepadMappingPlugin;
+pub(crate) struct GamepadMappingPlugin<S: StickIdType> {
+    _marker: PhantomData<S>,
+}
+
+impl<S: StickIdType> Default for GamepadMappingPlugin<S> {
+    fn default() -> Self {
+        Self { _marker: default() }
+    }
+}
 
 /// Plugin that makes TouchSticks pretend to be regular bevy gamepads
 ///
 /// Add [`GamepadAxisMapping`] to a [`TouchStick`] to make it show up as a bevy gamepad.
-impl Plugin for GamepadMappingPlugin {
+impl<S: StickIdType> Plugin for GamepadMappingPlugin<S> {
     fn build(&self, app: &mut App) {
-        app.add_systems(PreUpdate, (connect_gamepad, send_axis_events).chain());
+        app.add_systems(
+            PreUpdate,
+            (connect_gamepad::<S>, send_axis_events::<S>).chain(),
+        );
     }
 }
 
@@ -37,9 +50,9 @@ impl TouchStickGamepadMapping {
 }
 
 /// The gamepad is connected when the first [`TouchStick`] is added.
-fn connect_gamepad(
+fn connect_gamepad<S: StickIdType>(
     mut gamepad_events: EventWriter<GamepadEvent>,
-    sticks: Query<(), (With<TouchStick>, With<TouchStickGamepadMapping>)>,
+    sticks: Query<(), (With<TouchStick<S>>, With<TouchStickGamepadMapping>)>,
     mut was_connected: Local<bool>,
 ) {
     let connected = !sticks.is_empty();
@@ -63,9 +76,9 @@ fn connect_gamepad(
 }
 
 /// Reads values from touch sticks and sends as bevy input events
-fn send_axis_events(
+fn send_axis_events<S: StickIdType>(
     mut events: EventWriter<GamepadEvent>,
-    sticks: Query<(&TouchStick, &TouchStickGamepadMapping)>,
+    sticks: Query<(&TouchStick<S>, &TouchStickGamepadMapping)>,
 ) {
     for (stick, axis_mapping) in &sticks {
         let gamepad = TOUCH_GAMEPAD;

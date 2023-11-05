@@ -1,33 +1,9 @@
-use crate::{TouchStick, TouchStickType};
+use crate::{StickIdType, TouchStick};
 use bevy::{
     prelude::*,
     ui::{ContentSize, FocusPolicy, RelativeCursorPosition},
 };
 use std::hash::Hash;
-
-/// The tint color of the image
-///
-/// When combined with [`VirtualJoystickNode`], tints the provided texture, while still
-/// respecting transparent areas.
-#[derive(Component, Copy, Clone, Debug, Reflect)]
-#[reflect(Component, Default)]
-pub struct TintColor(pub Color);
-
-impl TintColor {
-    pub const DEFAULT: Self = Self(Color::WHITE);
-}
-
-impl Default for TintColor {
-    fn default() -> Self {
-        Self::DEFAULT
-    }
-}
-
-impl From<Color> for TintColor {
-    fn from(color: Color) -> Self {
-        Self(color)
-    }
-}
 
 /// Marker component for a bevy_ui Node area where sticks can be interacted with.
 #[derive(Component, Copy, Clone, Debug, Default, Reflect)]
@@ -36,36 +12,45 @@ pub struct TouchStickInteractionArea;
 
 // TODO: default returns a broken bundle, should remove or fix
 #[derive(Bundle, Debug, Default)]
-pub struct TouchStickBundle<
-    S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static,
-> {
+pub struct TouchStickBundle<S: StickIdType> {
+    pub stick: TouchStick<S>,
+
+    pub stick_node: TouchStickNode<S>,
+
     /// Indicates that this node may be interacted with
-    pub(crate) interaction_area: TouchStickInteractionArea,
+    pub interaction_area: TouchStickInteractionArea,
+
     /// Describes the size of the node
-    pub(crate) node: Node,
+    pub node: Node,
+
     /// Describes the style including flexbox settings
-    pub(crate) style: Style,
+    pub style: Style,
+
     /// The calculated size based on the given image
-    pub(crate) calculated_size: ContentSize,
-    /// The tint color of the image
-    pub(crate) color: TintColor,
-    pub(crate) joystick: TouchStickNode<S>,
+    pub calculated_size: ContentSize,
+
     /// Whether this node should block interaction with lower nodes
-    pub(crate) focus_policy: FocusPolicy,
+    pub focus_policy: FocusPolicy,
+
     /// The transform of the node
-    pub(crate) transform: Transform,
+    pub transform: Transform,
+
     /// The global transform of the node
-    pub(crate) global_transform: GlobalTransform,
+    pub global_transform: GlobalTransform,
+
     /// The visibility of the entity.
     pub visibility: Visibility,
+
     /// The inherited visibility of the entity.
     pub inherited_visibility: InheritedVisibility,
+
     /// The view visibility of the entity.
     pub view_visibility: ViewVisibility,
+
     /// Indicates the depth at which the node should appear in the UI
-    pub(crate) z_index: ZIndex,
-    pub(crate) stick: TouchStick,
-    pub(crate) cursor_pos: RelativeCursorPosition,
+    pub z_index: ZIndex,
+
+    pub cursor_pos: RelativeCursorPosition,
 }
 
 // todo: deriving Default for this is a mistake
@@ -80,59 +65,6 @@ pub struct TouchStickNode<S: Hash + Sync + Send + Clone + Default + Reflect + Fr
     pub knob_radius: f32,
     /// Radius for ring around the stick knob
     pub outline_radius: f32,
-    /// Define the behavior of joystick
-    pub behavior: TouchStickType,
-}
-
-impl<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static>
-    TouchStickBundle<S>
-{
-    pub fn new(joystick: TouchStickNode<S>) -> Self {
-        Self {
-            joystick,
-            ..default()
-        }
-    }
-
-    pub fn set_node(mut self, node: Node) -> Self {
-        self.node = node;
-        self
-    }
-
-    pub fn set_style(mut self, style: Style) -> Self {
-        self.style = style;
-        self
-    }
-
-    pub fn set_color(mut self, color: TintColor) -> Self {
-        self.color = color;
-        self
-    }
-
-    pub fn set_focus_policy(mut self, focus_policy: FocusPolicy) -> Self {
-        self.focus_policy = focus_policy;
-        self
-    }
-
-    pub fn set_transform(mut self, transform: Transform) -> Self {
-        self.transform = transform;
-        self
-    }
-
-    pub fn set_global_transform(mut self, global_transform: GlobalTransform) -> Self {
-        self.global_transform = global_transform;
-        self
-    }
-
-    pub fn set_visibility(mut self, visibility: Visibility) -> Self {
-        self.visibility = visibility;
-        self
-    }
-
-    pub fn set_z_index(mut self, z_index: ZIndex) -> Self {
-        self.z_index = z_index;
-        self
-    }
 }
 
 pub(crate) fn update_stick_ui() {}
