@@ -45,7 +45,7 @@ fn setup(mut commands: Commands) {
     ));
 
     // spawn a touch stick
-    commands.spawn(TouchStickBundle::<MyStick> {
+    commands.spawn(TouchStickUiBundle::<MyStick> {
         style: Style {
             width: Val::Px(150.),
             height: Val::Px(150.),

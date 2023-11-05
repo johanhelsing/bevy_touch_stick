@@ -9,8 +9,10 @@ mod input;
 mod joystick;
 
 pub mod prelude {
+    #[cfg(feature = "gamepad_mapping")]
+    pub use crate::TouchStickGamepadMapping;
     pub use crate::{
-        TouchStick, TouchStickBundle, TouchStickNode, TouchStickPlugin, TouchStickType,
+        TouchStick, TouchStickNode, TouchStickPlugin, TouchStickType, TouchStickUiBundle,
     };
 }
 
@@ -24,7 +26,7 @@ use crate::input::{
 };
 pub use crate::{
     behavior::TouchStickType,
-    joystick::{TouchStickBundle, TouchStickInteractionArea, TouchStickNode},
+    joystick::{TouchStickInteractionArea, TouchStickNode, TouchStickUiBundle},
 };
 
 /// pure data, independent of bevy_ui

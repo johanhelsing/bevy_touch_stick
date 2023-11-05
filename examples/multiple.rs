@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 // use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_touch_stick::*;
+use bevy_touch_stick::prelude::*;
 
 // ID for joysticks
 #[derive(Default, Reflect, Hash, Clone, PartialEq, Eq)]
@@ -52,7 +52,7 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 
     // Spawn Virtual Joystick on left
-    commands.spawn(TouchStickBundle {
+    commands.spawn(TouchStickUiBundle {
         stick: TouchStick {
             id: Stick::Left,
             stick_type: TouchStickType::Fixed,
@@ -70,7 +70,7 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 
     // Spawn Virtual Joystick on Right
-    commands.spawn(TouchStickBundle {
+    commands.spawn(TouchStickUiBundle {
         stick: TouchStick::new(Stick::Right),
         style: Style {
             width: Val::Px(150.),
@@ -85,20 +85,19 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn move_player(
-    // todo: don't use events
-    mut stick_events: EventReader<TouchStickEvent<Stick>>,
+    sticks: Query<&TouchStick<Stick>>,
     mut players: Query<(&mut Transform, &Player)>,
     time: Res<Time>,
 ) {
     let (mut player_transform, player) = players.single_mut();
 
-    for event in stick_events.read() {
-        let Vec2 { x, y } = event.value();
+    for stick in &sticks {
+        let Vec2 { x, y } = stick.value;
 
         let dt = time.delta_seconds();
 
         // todo: maybe it's more interesting to set player direction per stick instead?
-        match event.id() {
+        match stick.id {
             Stick::Left => {
                 player_transform.translation.x += x * player.max_speed * dt;
             }

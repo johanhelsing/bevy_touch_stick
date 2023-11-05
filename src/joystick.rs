@@ -12,7 +12,7 @@ pub struct TouchStickInteractionArea;
 
 // TODO: default returns a broken bundle, should remove or fix
 #[derive(Bundle, Debug, Default)]
-pub struct TouchStickBundle<S: StickIdType> {
+pub struct TouchStickUiBundle<S: StickIdType> {
     pub stick: TouchStick<S>,
 
     pub stick_node: TouchStickNode<S>,
