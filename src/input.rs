@@ -1,5 +1,5 @@
 use crate::{
-    StickIdType, TouchStick, TouchStickEvent, TouchStickEventType, TouchStickNode, TouchStickType,
+    StickIdType, TouchStick, TouchStickEvent, TouchStickEventType, TouchStickType, TouchStickUi,
 };
 use bevy::{
     input::{mouse::MouseButtonInput, touch::TouchPhase, ButtonState},
@@ -17,7 +17,7 @@ pub(crate) enum DragEvent {
 pub(crate) fn update_sticks_from_drag_events<S: StickIdType>(
     mut drag_events: EventReader<DragEvent>,
     mut stick_events: EventWriter<TouchStickEvent<S>>,
-    mut sticks: Query<(&TouchStickNode<S>, &mut TouchStick<S>)>,
+    mut sticks: Query<(&TouchStickUi<S>, &mut TouchStick<S>)>,
 ) {
     let input_events = drag_events.read().collect::<Vec<&DragEvent>>();
 

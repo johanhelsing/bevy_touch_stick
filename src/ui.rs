@@ -1,9 +1,10 @@
 use crate::{StickIdType, TouchStick};
 use bevy::{
     prelude::*,
+    render::render_resource::{AsBindGroup, ShaderRef},
     ui::{ContentSize, FocusPolicy, RelativeCursorPosition},
 };
-use std::hash::Hash;
+use std::{hash::Hash, marker::PhantomData};
 
 /// Marker component for a bevy_ui Node area where sticks can be interacted with.
 #[derive(Component, Copy, Clone, Debug, Default, Reflect)]
@@ -14,51 +15,40 @@ pub struct TouchStickInteractionArea;
 #[derive(Bundle, Debug, Default)]
 pub struct TouchStickUiBundle<S: StickIdType> {
     pub stick: TouchStick<S>,
-
-    pub stick_node: TouchStickNode<S>,
-
+    pub stick_node: TouchStickUi<S>,
     /// Indicates that this node may be interacted with
     pub interaction_area: TouchStickInteractionArea,
-
     /// Describes the size of the node
     pub node: Node,
-
     /// Describes the style including flexbox settings
     pub style: Style,
-
     /// The calculated size based on the given image
     pub calculated_size: ContentSize,
-
     /// Whether this node should block interaction with lower nodes
     pub focus_policy: FocusPolicy,
-
     /// The transform of the node
     pub transform: Transform,
-
     /// The global transform of the node
     pub global_transform: GlobalTransform,
-
     /// The visibility of the entity.
     pub visibility: Visibility,
-
     /// The inherited visibility of the entity.
     pub inherited_visibility: InheritedVisibility,
-
     /// The view visibility of the entity.
     pub view_visibility: ViewVisibility,
-
     /// Indicates the depth at which the node should appear in the UI
     pub z_index: ZIndex,
-
     pub cursor_pos: RelativeCursorPosition,
+    // /// The [`UiMaterial`] used to render the node.
+    // pub material: Handle<M>,
+    pub material: Handle<CircleMaterial>,
 }
 
 // todo: deriving Default for this is a mistake
 /// bevy ui config for a stick
 #[derive(Component, Clone, Debug, Default, Reflect)]
 #[reflect(Component, Default)]
-pub struct TouchStickNode<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static>
-{
+pub struct TouchStickUi<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static> {
     /// Identifier of joystick
     pub id: S,
     /// Radius for knob on joystick
@@ -67,7 +57,41 @@ pub struct TouchStickNode<S: Hash + Sync + Send + Clone + Default + Reflect + Fr
     pub outline_radius: f32,
 }
 
-pub(crate) fn update_stick_ui() {}
+#[derive(AsBindGroup, Asset, TypePath, Debug, Clone)]
+pub struct CircleMaterial {
+    #[uniform(0)]
+    color: Vec4,
+}
+
+impl UiMaterial for CircleMaterial {
+    fn fragment_shader() -> ShaderRef {
+        // todo: embed
+        "touchstick.wgsl".into()
+    }
+}
+
+pub(crate) fn update_stick_ui<S: StickIdType>(sticks: Query<(), With<TouchStickUi<S>>>) {
+    for _stick in &sticks {
+        // update the nodes so they look like we want them to!
+    }
+}
+
+pub(crate) struct TouchStickUiPlugin<S: StickIdType> {
+    marker: PhantomData<S>,
+}
+
+impl<S: StickIdType> Default for TouchStickUiPlugin<S> {
+    fn default() -> Self {
+        Self { marker: default() }
+    }
+}
+
+impl<S: StickIdType> Plugin for TouchStickUiPlugin<S> {
+    fn build(&self, app: &mut App) {
+        app.add_plugins(UiMaterialPlugin::<CircleMaterial>::default());
+        app.add_systems(Update, update_stick_ui::<S>);
+    }
+}
 
 // #[allow(clippy::type_complexity)]
 // pub fn extract_joystick_node<

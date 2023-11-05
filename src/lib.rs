@@ -1,6 +1,6 @@
 use bevy::{prelude::*, reflect::TypePath, ui::UiSystem};
 use std::{hash::Hash, marker::PhantomData};
-use ui::update_stick_ui;
+use ui::TouchStickUiPlugin;
 
 mod behavior;
 #[cfg(feature = "gamepad_mapping")]
@@ -12,7 +12,7 @@ pub mod prelude {
     #[cfg(feature = "gamepad_mapping")]
     pub use crate::TouchStickGamepadMapping;
     pub use crate::{
-        TouchStick, TouchStickNode, TouchStickPlugin, TouchStickType, TouchStickUiBundle,
+        TouchStick, TouchStickPlugin, TouchStickType, TouchStickUi, TouchStickUiBundle,
     };
 }
 
@@ -26,7 +26,7 @@ use crate::input::{
 };
 pub use crate::{
     behavior::TouchStickType,
-    ui::{TouchStickInteractionArea, TouchStickNode, TouchStickUiBundle},
+    ui::{TouchStickInteractionArea, TouchStickUi, TouchStickUiBundle},
 };
 
 /// pure data, independent of bevy_ui
@@ -86,12 +86,13 @@ impl<S> Default for TouchStickPlugin<S> {
 impl<S: StickIdType> Plugin for TouchStickPlugin<S> {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.register_type::<TouchStickInteractionArea>()
-            .register_type::<TouchStickNode<S>>()
+            .register_type::<TouchStickUi<S>>()
             .register_type::<TouchStick<S>>()
             .register_type::<TouchStickType>()
             .register_type::<TouchStickEventType>()
             .add_event::<TouchStickEvent<S>>()
             .add_event::<DragEvent>()
+            .add_plugins(TouchStickUiPlugin::<S>::default())
             .add_systems(
                 PreUpdate,
                 (
@@ -104,8 +105,7 @@ impl<S: StickIdType> Plugin for TouchStickPlugin<S> {
             .add_systems(
                 PostUpdate,
                 map_input_zones_from_ui_nodes::<S>.before(UiSystem::Layout),
-            )
-            .add_systems(Update, update_stick_ui);
+            );
 
         #[cfg(feature = "gamepad_mapping")]
         app.add_plugins(GamepadMappingPlugin::<S>::default());
