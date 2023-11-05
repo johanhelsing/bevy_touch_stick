@@ -53,11 +53,7 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // Spawn Virtual Joystick on left
     commands.spawn(TouchStickUiBundle {
-        stick: TouchStick {
-            id: Stick::Left,
-            stick_type: TouchStickType::Fixed,
-            ..default()
-        },
+        stick: Stick::Left.into(),
         style: Style {
             width: Val::Px(150.),
             height: Val::Px(150.),
@@ -71,7 +67,7 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // Spawn Virtual Joystick on Right
     commands.spawn(TouchStickUiBundle {
-        stick: TouchStick::new(Stick::Right),
+        stick: Stick::Right.into(),
         style: Style {
             width: Val::Px(150.),
             height: Val::Px(150.),

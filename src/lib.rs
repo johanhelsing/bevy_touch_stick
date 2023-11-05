@@ -1,12 +1,12 @@
 use bevy::{prelude::*, reflect::TypePath, ui::UiSystem};
-use joystick::update_stick_ui;
 use std::{hash::Hash, marker::PhantomData};
+use ui::update_stick_ui;
 
 mod behavior;
 #[cfg(feature = "gamepad_mapping")]
 mod gamepad;
 mod input;
-mod joystick;
+mod ui;
 
 pub mod prelude {
     #[cfg(feature = "gamepad_mapping")]
@@ -26,7 +26,7 @@ use crate::input::{
 };
 pub use crate::{
     behavior::TouchStickType,
-    joystick::{TouchStickInteractionArea, TouchStickNode, TouchStickUiBundle},
+    ui::{TouchStickInteractionArea, TouchStickNode, TouchStickUiBundle},
 };
 
 /// pure data, independent of bevy_ui
@@ -45,6 +45,12 @@ pub struct TouchStick<S: StickIdType> {
     pub interactable_zone: Rect,
     /// Define the behavior of joystick
     pub stick_type: TouchStickType,
+}
+
+impl<S: StickIdType> From<S> for TouchStick<S> {
+    fn from(id: S) -> Self {
+        Self::new(id)
+    }
 }
 
 impl<S: StickIdType> TouchStick<S> {
