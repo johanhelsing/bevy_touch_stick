@@ -1,15 +1,11 @@
-use std::hash::Hash;
-
+use crate::{TouchStick, TouchStickEvent, TouchStickEventType, TouchStickNode, TouchStickType};
 use bevy::{
     input::{mouse::MouseButtonInput, touch::TouchPhase, ButtonState},
     prelude::*,
     reflect::TypePath,
     window::PrimaryWindow,
 };
-
-use crate::{
-    joystick::TouchStick, TouchStickEvent, TouchStickEventType, TouchStickNode, TouchStickType,
-};
+use std::hash::Hash;
 
 #[derive(Event)]
 pub(crate) enum DragEvent {

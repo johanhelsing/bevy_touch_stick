@@ -1,5 +1,4 @@
-use std::hash::Hash;
-
+use crate::{TouchStick, TouchStickType};
 use bevy::{
     prelude::*,
     render::Extract,
@@ -8,8 +7,7 @@ use bevy::{
         UiStack,
     },
 };
-
-use crate::TouchStickType;
+use std::hash::Hash;
 
 /// The tint color of the image
 ///
@@ -93,20 +91,6 @@ pub struct TouchStickNode<S: Hash + Sync + Send + Clone + Default + Reflect + Fr
     pub dead_zone: f32,
     /// Define the behavior of joystick
     pub behavior: TouchStickType,
-}
-
-/// pure data, independent of bevy_ui
-#[derive(Component, Clone, Debug, Default, Reflect)]
-#[reflect(Component, Default)]
-pub struct TouchStick {
-    pub(crate) drag_id: Option<u64>,
-    pub(crate) dead_zone: f32,
-    pub(crate) base_position: Vec2,
-    pub(crate) start_position: Vec2,
-    pub(crate) current_position: Vec2,
-    /// Value with maximum magnitude 1
-    pub value: Vec2,
-    pub(crate) interactable_zone: Rect,
 }
 
 impl<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static>

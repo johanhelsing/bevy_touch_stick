@@ -24,14 +24,27 @@ use crate::gamepad::GamepadMappingPlugin;
 pub use crate::gamepad::TouchStickGamepadMapping;
 pub use crate::{
     behavior::TouchStickType,
-    joystick::{
-        TintColor, TouchStick, TouchStickBundle, TouchStickInteractionArea, TouchStickNode,
-    },
+    joystick::{TintColor, TouchStickBundle, TouchStickInteractionArea, TouchStickNode},
 };
 use crate::{
     input::{update_input, update_sticks, update_sticks_from_mouse, DragEvent},
     joystick::extract_joystick_node,
 };
+
+/// pure data, independent of bevy_ui
+#[derive(Component, Clone, Debug, Default, Reflect)]
+#[reflect(Component, Default)]
+pub struct TouchStick {
+    pub(crate) drag_id: Option<u64>,
+    pub(crate) dead_zone: f32,
+    pub(crate) base_position: Vec2,
+    pub(crate) start_position: Vec2,
+    pub(crate) current_position: Vec2,
+    /// Value with maximum magnitude 1
+    pub value: Vec2,
+    /// In input space (y-down)
+    pub(crate) interactable_zone: Rect,
+}
 
 pub struct TouchStickPlugin<S> {
     _marker: PhantomData<S>,
