@@ -68,11 +68,24 @@ impl UiMaterial for CircleMaterial {
         // todo: embed
         "touchstick.wgsl".into()
     }
+    fn vertex_shader() -> ShaderRef {
+        "touchstick.wgsl".into()
+    }
 }
 
-pub(crate) fn update_stick_ui<S: StickIdType>(sticks: Query<(), With<TouchStickUi<S>>>) {
-    for _stick in &sticks {
+pub(crate) fn update_stick_ui<S: StickIdType>(
+    mut sticks: Query<(&TouchStick<S>, &mut Style), With<TouchStickUi<S>>>,
+) {
+    for (stick, mut style) in &mut sticks {
         // update the nodes so they look like we want them to!
+
+        // this is a giant hack to shoehorn the stick position into the ui vertex buffer
+        style.border = UiRect {
+            left: Val::Px(stick.value.x),
+            right: Val::Px(stick.value.y),
+            top: Val::Px(stick.drag_start.x),
+            bottom: Val::Px(stick.drag_start.y),
+        };
     }
 }
 

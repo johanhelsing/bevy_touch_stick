@@ -27,8 +27,8 @@ pub(crate) fn update_sticks_from_drag_events<S: StickIdType>(
                 DragEvent::Start { id, position } => {
                     if stick.interactable_zone.contains(*position) && stick.drag_id != Some(*id) {
                         stick.drag_id = Some(*id);
-                        stick.start_position = *position;
-                        stick.current_position = *position;
+                        stick.drag_start = *position;
+                        stick.drag_position = *position;
                         stick.value = Vec2::ZERO;
                         stick_events.send(TouchStickEvent {
                             id: stick.id.clone(),
@@ -38,18 +38,18 @@ pub(crate) fn update_sticks_from_drag_events<S: StickIdType>(
                     }
                 }
                 DragEvent::Drag { id, position: pos } if Some(*id) == stick.drag_id => {
-                    stick.current_position = *pos;
+                    stick.drag_position = *pos;
                     let half = stick.interactable_zone.half_size();
                     if stick.stick_type == TouchStickType::Dynamic {
                         stick.base_position = *pos;
-                        let to_knob = stick.current_position - stick.start_position;
+                        let to_knob = stick.drag_position - stick.drag_start;
                         let distance_to_knob = to_knob.length();
                         if distance_to_knob > half.x {
                             let excess_distance = distance_to_knob - half.x;
-                            stick.start_position += to_knob.normalize() * excess_distance;
+                            stick.drag_start += to_knob.normalize() * excess_distance;
                         }
                     }
-                    let d = (stick.current_position - stick.start_position) / half;
+                    let d = (stick.drag_position - stick.drag_start) / half;
                     let length = d.length();
                     // input events are y positive down, so we flip it
                     stick.value = Vec2::new(d.x, -d.y) / length.max(1.);
@@ -57,8 +57,8 @@ pub(crate) fn update_sticks_from_drag_events<S: StickIdType>(
                 DragEvent::End { id } if Some(*id) == stick.drag_id => {
                     stick.drag_id = None;
                     stick.base_position = Vec2::ZERO;
-                    stick.start_position = Vec2::ZERO;
-                    stick.current_position = Vec2::ZERO;
+                    stick.drag_start = Vec2::ZERO;
+                    stick.drag_position = Vec2::ZERO;
                     stick.value = Vec2::ZERO;
                     stick_events.send(TouchStickEvent {
                         id: node.id.clone(),

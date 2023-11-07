@@ -38,9 +38,12 @@ pub struct TouchStick<S: StickIdType> {
     pub id: S,
     pub drag_id: Option<u64>,
     pub dead_zone: f32,
+    /// todo: only used for dynamic mode
     pub base_position: Vec2,
-    pub start_position: Vec2,
-    pub current_position: Vec2,
+    /// The screen position where the drag was started
+    pub drag_start: Vec2,
+    /// The screen position where the drag is currently at
+    pub drag_position: Vec2,
     /// Value with maximum magnitude 1
     pub value: Vec2,
     /// In input space (y-down)
