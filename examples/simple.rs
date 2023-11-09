@@ -91,7 +91,6 @@ fn setup(
                 TouchStickUiKnob,
                 ImageBundle {
                     image: asset_server.load("knob.png").into(),
-                    focus_policy: FocusPolicy::Pass,
                     style: Style {
                         width: Val::Px(50.),
                         height: Val::Px(50.),
@@ -105,7 +104,6 @@ fn setup(
                 TouchStickUiOutline,
                 ImageBundle {
                     image: asset_server.load("outline.png").into(),
-                    focus_policy: FocusPolicy::Pass,
                     style: Style {
                         width: Val::Px(150.),
                         height: Val::Px(150.),
