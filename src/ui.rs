@@ -136,17 +136,8 @@ impl<S: StickIdType> Plugin for TouchStickUiPlugin<S> {
 #[allow(clippy::type_complexity)]
 pub(crate) fn patch_stick_node<S: StickIdType>(
     mut extracted_uinodes: ResMut<ExtractedUiNodes>,
-    images: Extract<Res<Assets<Image>>>,
     ui_stack: Extract<Res<UiStack>>,
-    uinode_query: Extract<
-        Query<(
-            Entity,
-            &Node,
-            &GlobalTransform,
-            &TouchStickUi<S>,
-            &ViewVisibility,
-        )>,
-    >,
+    uinode_query: Extract<Query<(&Node, &GlobalTransform, &TouchStickUi<S>, &ViewVisibility)>>,
     knob_ui_query: Extract<Query<&Parent, With<TouchStickUiKnob>>>,
     outline_ui_query: Extract<Query<&Parent, With<TouchStickUiOutline>>>,
     sticks: Extract<Query<&TouchStick<S>>>,
@@ -160,7 +151,7 @@ pub(crate) fn patch_stick_node<S: StickIdType>(
         if let Ok(knob_parent) = knob_ui_query.get(*entity) {
             let knob_entity = *entity;
 
-            if let Ok((entity, uinode, global_transform, stick_ui, visibility)) =
+            if let Ok((uinode, global_transform, stick_ui, visibility)) =
                 uinode_query.get(**knob_parent)
             {
                 let container_rect = Rect {
@@ -218,7 +209,7 @@ pub(crate) fn patch_stick_node<S: StickIdType>(
 
         if let Ok(outline_parent) = outline_ui_query.get(*entity) {
             let outline_entity = *entity;
-            if let Ok((entity, uinode, global_transform, stick_ui, visibility)) =
+            if let Ok((uinode, global_transform, stick_ui, visibility)) =
                 uinode_query.get(**outline_parent)
             {
                 let container_rect = Rect {
