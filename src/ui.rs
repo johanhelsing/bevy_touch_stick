@@ -142,7 +142,6 @@ pub(crate) fn patch_stick_node<S: StickIdType>(
     outline_ui_query: Extract<Query<&Parent, With<TouchStickUiOutline>>>,
     sticks: Extract<Query<&TouchStick<S>>>,
 ) {
-    // let image = AssetId::<Image>::default();
     let data = sticks.single();
 
     for (stack_index, entity) in ui_stack.uinodes.iter().enumerate() {
@@ -188,28 +187,20 @@ pub(crate) fn patch_stick_node<S: StickIdType>(
                         TouchStickType::Dynamic => (data.base_position + pos).extend(0.),
                     };
 
-                    extracted_uinodes.uinodes.insert(
-                        knob_entity,
-                        ExtractedUiNode {
-                            rect,
-                            stack_index,
-                            transform: Mat4::from_translation(knob_pos),
-                            color: Color::WHITE,
-                            image: stick_ui.knob_image.id(),
-                            // image,
-                            atlas_size: None,
-                            clip: None,
-                            flip_x: false,
-                            flip_y: false,
-                        },
-                    );
+                    extracted_uinodes
+                        .uinodes
+                        .entry(knob_entity)
+                        .and_modify(|node| {
+                            node.transform = Mat4::from_translation(knob_pos);
+                            node.rect = rect;
+                        });
                 }
             }
         }
 
         if let Ok(outline_parent) = outline_ui_query.get(*entity) {
             let outline_entity = *entity;
-            if let Ok((uinode, global_transform, stick_ui, visibility)) =
+            if let Ok((uinode, global_transform, _stick_ui, visibility)) =
                 uinode_query.get(**outline_parent)
             {
                 let container_rect = Rect {
@@ -236,21 +227,13 @@ pub(crate) fn patch_stick_node<S: StickIdType>(
                         TouchStickType::Dynamic => data.base_position.extend(0.),
                     };
 
-                    extracted_uinodes.uinodes.insert(
-                        outline_entity,
-                        ExtractedUiNode {
-                            stack_index,
-                            transform: Mat4::from_translation(border_pos),
-                            color: Color::WHITE,
-                            rect: container_rect,
-                            image: stick_ui.border_image.id(),
-                            // image,
-                            atlas_size: None,
-                            clip: None,
-                            flip_x: false,
-                            flip_y: false,
-                        },
-                    );
+                    extracted_uinodes
+                        .uinodes
+                        .entry(outline_entity)
+                        .and_modify(|node| {
+                            node.transform = Mat4::from_translation(border_pos);
+                            node.rect = container_rect;
+                        });
                 }
             }
         }
