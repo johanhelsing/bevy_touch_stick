@@ -17,12 +17,21 @@ use std::{hash::Hash, marker::PhantomData};
 #[reflect(Component, Default)]
 pub struct TouchStickInteractionArea;
 
+/// Marker component
+#[derive(Component, Copy, Clone, Debug, Default, Reflect)]
+#[reflect(Component, Default)]
+pub struct TouchStickUiKnob;
+
+/// Marker component
+#[derive(Component, Copy, Clone, Debug, Default, Reflect)]
+#[reflect(Component, Default)]
+pub struct TouchStickUiOutline;
+
 // TODO: default returns a broken bundle, should remove or fix
 #[derive(Bundle, Debug, Default)]
 pub struct TouchStickUiBundle<S: StickIdType> {
     pub stick: TouchStick<S>,
     pub stick_node: TouchStickUi<S>,
-    /// Indicates that this node may be interacted with
     pub interaction_area: TouchStickInteractionArea,
     /// Describes the size of the node
     pub node: Node,
@@ -125,7 +134,7 @@ impl<S: StickIdType> Plugin for TouchStickUiPlugin<S> {
 }
 
 #[allow(clippy::type_complexity)]
-pub fn patch_stick_node<S: StickIdType>(
+pub(crate) fn patch_stick_node<S: StickIdType>(
     mut extracted_uinodes: ResMut<ExtractedUiNodes>,
     images: Extract<Res<Assets<Image>>>,
     ui_stack: Extract<Res<UiStack>>,
@@ -138,104 +147,121 @@ pub fn patch_stick_node<S: StickIdType>(
             &ViewVisibility,
         )>,
     >,
+    knob_ui_query: Extract<Query<&Parent, With<TouchStickUiKnob>>>,
+    outline_ui_query: Extract<Query<&Parent, With<TouchStickUiOutline>>>,
     sticks: Extract<Query<&TouchStick<S>>>,
 ) {
     // let image = AssetId::<Image>::default();
+    let data = sticks.single();
 
     for (stack_index, entity) in ui_stack.uinodes.iter().enumerate() {
         let stack_index = stack_index as u32;
 
-        if let Ok((entity, uinode, global_transform, stick_ui, visibility)) =
-            uinode_query.get(*entity)
-        {
-            let data = sticks.single(); // todo: multiple
+        if let Ok(knob_parent) = knob_ui_query.get(*entity) {
+            let knob_entity = *entity;
 
-            if !visibility.get() || uinode.size().x == 0. || uinode.size().y == 0.
-            // || color.0.a() == 0.
-            || !images.contains(&stick_ui.border_image)
-            || !images.contains(&stick_ui.knob_image)
-            // || data.drag_id.is_none() && stick_ui.behavior == TouchStickType::Dynamic
+            if let Ok((entity, uinode, global_transform, stick_ui, visibility)) =
+                uinode_query.get(**knob_parent)
             {
-                continue;
+                let container_rect = Rect {
+                    max: uinode.size(),
+                    ..default()
+                };
+                // we have a knob
+                if visibility.get() && uinode.size().x != 0. && uinode.size().y != 0. {
+                    let rect = Rect {
+                        max: Vec2::splat(stick_ui.knob_radius),
+                        ..default()
+                    };
+
+                    let radius = uinode.size().x / 2.;
+                    let axis_value = data.value;
+                    // ui is y down, so we flip
+                    let pos = Vec2::new(axis_value.x, -axis_value.y) * radius;
+
+                    let knob_pos = match data.stick_type {
+                        TouchStickType::Fixed => {
+                            global_transform.compute_matrix().transform_point3(
+                                (container_rect.center() - (uinode.size() / 2.) + pos).extend(0.),
+                            )
+                        }
+                        TouchStickType::Floating => {
+                            if data.drag_id.is_none() {
+                                global_transform.compute_matrix().transform_point3(
+                                    (container_rect.center() - (uinode.size() / 2.)).extend(0.),
+                                )
+                            } else {
+                                (data.drag_start + pos).extend(0.)
+                            }
+                        }
+                        TouchStickType::Dynamic => (data.base_position + pos).extend(0.),
+                    };
+
+                    extracted_uinodes.uinodes.insert(
+                        knob_entity,
+                        ExtractedUiNode {
+                            rect,
+                            stack_index,
+                            transform: Mat4::from_translation(knob_pos),
+                            color: Color::WHITE,
+                            image: stick_ui.knob_image.id(),
+                            // image,
+                            atlas_size: None,
+                            clip: None,
+                            flip_x: false,
+                            flip_y: false,
+                        },
+                    );
+                }
             }
-            let container_rect = Rect {
-                max: uinode.size(),
-                ..default()
-            };
+        }
 
-            let border_pos = match data.stick_type {
-                TouchStickType::Fixed => global_transform
-                    .compute_matrix()
-                    .transform_point3((container_rect.center() - (uinode.size() / 2.)).extend(0.)),
-                TouchStickType::Floating => {
-                    if data.drag_id.is_none() {
-                        global_transform.compute_matrix().transform_point3(
-                            (container_rect.center() - (uinode.size() / 2.)).extend(0.),
-                        )
-                    } else {
-                        data.drag_start.extend(0.)
-                    }
+        if let Ok(outline_parent) = outline_ui_query.get(*entity) {
+            let outline_entity = *entity;
+            if let Ok((entity, uinode, global_transform, stick_ui, visibility)) =
+                uinode_query.get(**outline_parent)
+            {
+                let container_rect = Rect {
+                    max: uinode.size(),
+                    ..default()
+                };
+                // we have a knob
+                if visibility.get() && uinode.size().x != 0. && uinode.size().y != 0. {
+                    let border_pos = match data.stick_type {
+                        TouchStickType::Fixed => {
+                            global_transform.compute_matrix().transform_point3(
+                                (container_rect.center() - (uinode.size() / 2.)).extend(0.),
+                            )
+                        }
+                        TouchStickType::Floating => {
+                            if data.drag_id.is_none() {
+                                global_transform.compute_matrix().transform_point3(
+                                    (container_rect.center() - (uinode.size() / 2.)).extend(0.),
+                                )
+                            } else {
+                                data.drag_start.extend(0.)
+                            }
+                        }
+                        TouchStickType::Dynamic => data.base_position.extend(0.),
+                    };
+
+                    extracted_uinodes.uinodes.insert(
+                        outline_entity,
+                        ExtractedUiNode {
+                            stack_index,
+                            transform: Mat4::from_translation(border_pos),
+                            color: Color::WHITE,
+                            rect: container_rect,
+                            image: stick_ui.border_image.id(),
+                            // image,
+                            atlas_size: None,
+                            clip: None,
+                            flip_x: false,
+                            flip_y: false,
+                        },
+                    );
                 }
-                TouchStickType::Dynamic => data.base_position.extend(0.),
-            };
-
-            extracted_uinodes.uinodes.insert(
-                entity,
-                ExtractedUiNode {
-                    stack_index,
-                    transform: Mat4::from_translation(border_pos),
-                    color: Color::WHITE,
-                    rect: container_rect,
-                    image: stick_ui.border_image.id(),
-                    // image,
-                    atlas_size: None,
-                    clip: None,
-                    flip_x: false,
-                    flip_y: false,
-                },
-            );
-
-            let rect = Rect {
-                max: Vec2::splat(stick_ui.knob_radius),
-                ..default()
-            };
-
-            let radius = uinode.size().x / 2.;
-            let axis_value = data.value;
-            // ui is y down, so we flip
-            let pos = Vec2::new(axis_value.x, -axis_value.y) * radius;
-
-            let knob_pos = match data.stick_type {
-                TouchStickType::Fixed => global_transform.compute_matrix().transform_point3(
-                    (container_rect.center() - (uinode.size() / 2.) + pos).extend(0.),
-                ),
-                TouchStickType::Floating => {
-                    if data.drag_id.is_none() {
-                        global_transform.compute_matrix().transform_point3(
-                            (container_rect.center() - (uinode.size() / 2.)).extend(0.),
-                        )
-                    } else {
-                        (data.drag_start + pos).extend(0.)
-                    }
-                }
-                TouchStickType::Dynamic => (data.base_position + pos).extend(0.),
-            };
-
-            extracted_uinodes.uinodes.insert(
-                entity,
-                ExtractedUiNode {
-                    rect,
-                    stack_index,
-                    transform: Mat4::from_translation(knob_pos),
-                    color: Color::WHITE,
-                    image: stick_ui.knob_image.id(),
-                    // image,
-                    atlas_size: None,
-                    clip: None,
-                    flip_x: false,
-                    flip_y: false,
-                },
-            );
+            }
         }
     }
 }

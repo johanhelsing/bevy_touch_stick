@@ -30,7 +30,10 @@ use crate::input::{
 };
 pub use crate::{
     behavior::TouchStickType,
-    ui::{TouchStickInteractionArea, TouchStickUi, TouchStickUiBundle},
+    ui::{
+        TouchStickInteractionArea, TouchStickUi, TouchStickUiBundle, TouchStickUiKnob,
+        TouchStickUiOutline,
+    },
 };
 
 /// pure data, independent of bevy_ui
@@ -130,23 +133,19 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + TypePath 
 }
 
 fn map_input_zones_from_ui_nodes<S: StickIdType>(
-    interaction_areas: Query<(&Node, With<TouchStickInteractionArea>)>,
-    mut sticks: Query<(&Transform, &mut TouchStick<S>)>,
+    interaction_areas: Query<(&Transform, &Node), With<TouchStickInteractionArea>>,
+    mut sticks: Query<&mut TouchStick<S>>,
 ) {
-    // todo: this looks like a giant hack
-    // should map based on ids!
-    let interaction_areas = interaction_areas
-        .iter()
-        .map(|(node, _)| node.size())
-        .collect::<Vec<Vec2>>();
+    for (transform, node) in &interaction_areas {
+        // todo: match stick ids!
 
-    for (i, (stick_transform, mut stick)) in sticks.iter_mut().enumerate() {
-        let j_pos = stick_transform.translation.truncate();
-        let Some(size) = interaction_areas.get(i) else {
-            return;
-        };
-        let interaction_area = Rect::from_center_size(j_pos, *size);
-        stick.interactable_zone = interaction_area;
+        let pos = transform.translation.truncate();
+        let size = node.size();
+        let interaction_area = Rect::from_center_size(pos, size);
+
+        for mut stick in sticks.iter_mut() {
+            stick.interactable_zone = interaction_area;
+        }
     }
 }
 
