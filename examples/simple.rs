@@ -93,10 +93,8 @@ fn setup(
                     image: asset_server.load("knob.png").into(),
                     focus_policy: FocusPolicy::Pass,
                     style: Style {
-                        position_type: PositionType::Absolute,
                         width: Val::Px(50.),
                         height: Val::Px(50.),
-                        margin: UiRect::all(Val::Auto),
                         ..default()
                     },
                     background_color: Color::ORANGE.with_a(0.3).into(),
@@ -109,7 +107,6 @@ fn setup(
                     image: asset_server.load("outline.png").into(),
                     focus_policy: FocusPolicy::Pass,
                     style: Style {
-                        position_type: PositionType::Absolute,
                         width: Val::Px(150.),
                         height: Val::Px(150.),
                         ..default()
