@@ -6,8 +6,6 @@ mod behavior;
 #[cfg(feature = "gamepad_mapping")]
 mod gamepad;
 mod input;
-#[cfg(feature = "material2d")]
-mod renderer;
 mod ui;
 
 pub mod prelude {
@@ -16,8 +14,6 @@ pub mod prelude {
     pub use crate::{
         TouchStick, TouchStickPlugin, TouchStickType, TouchStickUi, TouchStickUiBundle,
     };
-    // todo: remove this?
-    pub use crate::ui::CircleMaterial;
 }
 
 #[cfg(feature = "gamepad_mapping")]
@@ -31,8 +27,8 @@ use crate::input::{
 pub use crate::{
     behavior::TouchStickType,
     ui::{
-        CircleMaterial, TouchStickInteractionArea, TouchStickUi, TouchStickUiBundle,
-        TouchStickUiKnob, TouchStickUiOutline,
+        TouchStickInteractionArea, TouchStickUi, TouchStickUiBundle, TouchStickUiKnob,
+        TouchStickUiOutline,
     },
 };
 

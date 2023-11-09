@@ -1,10 +1,7 @@
 use crate::{StickIdType, TouchStick, TouchStickType};
 use bevy::{
     prelude::*,
-    render::{
-        render_resource::{AsBindGroup, ShaderRef},
-        Extract, RenderApp,
-    },
+    render::{Extract, RenderApp},
     ui::{ContentSize, ExtractedUiNodes, FocusPolicy, RelativeCursorPosition, RenderUiSystem},
 };
 use std::{hash::Hash, marker::PhantomData};
@@ -59,12 +56,6 @@ pub struct TouchStickUiBundle<S: StickIdType> {
 pub struct TouchStickUi<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static> {
     /// Identifier of joystick
     pub id: S,
-}
-
-#[derive(AsBindGroup, Asset, TypePath, Debug, Clone)]
-pub struct CircleMaterial {
-    #[uniform(0)]
-    pub color: Vec4,
 }
 
 pub(crate) struct TouchStickUiPlugin<S: StickIdType> {
