@@ -26,7 +26,11 @@ struct Player {
     max_speed: f32,
 }
 
-fn setup(mut commands: Commands, mut materials: ResMut<Assets<CircleMaterial>>) {
+fn setup(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<CircleMaterial>>,
+    asset_server: Res<AssetServer>,
+) {
     commands.spawn(Camera2dBundle {
         transform: Transform::from_xyz(0., 0., 5.0),
         ..default()
@@ -44,12 +48,22 @@ fn setup(mut commands: Commands, mut materials: ResMut<Assets<CircleMaterial>>) 
         },
     ));
 
+    // sticks are entities for now (could perhaps be resources)
+    // commands.spawn(TouchStick::<MyStick>::default());
+
     // spawn a touch stick
     commands.spawn(TouchStickUiBundle::<MyStick> {
         // todo: provide default material
-        material: materials.add(CircleMaterial {
-            color: Vec4::new(1., 0., 0., 1.),
-        }),
+        stick_node: TouchStickUi {
+            knob_image: asset_server.load("knob.png"),
+            border_image: asset_server.load("outline.png"),
+            knob_radius: 40.,
+            outline_radius: 80.,
+            ..default()
+        },
+        // material: materials.add(CircleMaterial {
+        //     color: Vec4::new(1., 0., 0., 1.),
+        // }),
         style: Style {
             width: Val::Px(150.),
             height: Val::Px(150.),
