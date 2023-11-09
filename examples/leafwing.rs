@@ -1,8 +1,6 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_touch_stick::{
-    prelude::*, TintColor, TouchStickEvent, TouchStickEventType, TouchStickGamepadMapping,
-};
+// use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy_touch_stick::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 /// Marker type for our touch stick
@@ -20,14 +18,14 @@ fn main() {
         .add_plugins((
             DefaultPlugins,
             // add an inspector for easily changing settings at runtime
-            WorldInspectorPlugin::default(),
+            // WorldInspectorPlugin::default(),
             // add the plugin
             TouchStickPlugin::<MyStick>::default(),
             // add leafwing plugin
             InputManagerPlugin::<Action>::default(),
         ))
         .add_systems(Startup, setup)
-        .add_systems(Update, (update_stick_color, move_player))
+        .add_systems(Update, move_player)
         .run();
 }
 
@@ -36,7 +34,7 @@ struct Player {
     max_speed: f32,
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup(mut commands: Commands) {
     commands.spawn(Camera2dBundle {
         transform: Transform::from_xyz(0., 0., 5.0),
         ..default()
@@ -67,45 +65,20 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         // map this stick as a left gamepad stick (through bevy_input)
         // leafwing will register this as a normal gamepad
         TouchStickGamepadMapping::LEFT_STICK,
-        TouchStickBundle::new(TouchStickNode::<MyStick> {
-            border_image: asset_server.load("outline.png"),
-            knob_image: asset_server.load("knob.png"),
-            knob_size: Vec2::splat(80.),
-            dead_zone: 0.,
+        TouchStickUiBundle {
+            stick: TouchStick::<MyStick>::default(),
+            // configure the interactable area through bevy_ui
+            style: Style {
+                width: Val::Px(150.),
+                height: Val::Px(150.),
+                position_type: PositionType::Absolute,
+                left: Val::Percent(50.),
+                bottom: Val::Percent(15.),
+                ..default()
+            },
             ..default()
-        })
-        // set the tint color for the knob texture
-        .set_color(TintColor(Color::WHITE.with_a(0.2)))
-        // configure the interactable area through bevy_ui
-        .set_style(Style {
-            width: Val::Px(150.),
-            height: Val::Px(150.),
-            position_type: PositionType::Absolute,
-            left: Val::Percent(50.),
-            bottom: Val::Percent(15.),
-            ..default()
-        }),
-        // make it easy to see the area in which the stick can be interacted with
-        BackgroundColor(Color::WHITE.with_a(0.05)),
+        },
     ));
-}
-
-fn update_stick_color(
-    mut stick_events: EventReader<TouchStickEvent<MyStick>>,
-    mut sticks: Query<(&mut TintColor, &TouchStickNode<MyStick>)>,
-) {
-    for event in stick_events.iter() {
-        let tint_color = match event.get_type() {
-            TouchStickEventType::Press | TouchStickEventType::Drag => TintColor(Color::WHITE),
-            TouchStickEventType::Release => TintColor(Color::WHITE.with_a(0.2)),
-        };
-
-        for (mut color, node) in &mut sticks {
-            if node.id == event.id() {
-                *color = tint_color;
-            }
-        }
-    }
 }
 
 fn move_player(

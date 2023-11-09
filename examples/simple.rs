@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_touch_stick::{prelude::*, TintColor, TouchStickEvent, TouchStickEventType};
+// use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy_touch_stick::{prelude::*, TouchStickUiKnob, TouchStickUiOutline};
 
 /// Marker type for our touch stick
 #[derive(Default, Reflect, Hash, Clone, PartialEq, Eq)]
@@ -12,12 +12,12 @@ fn main() {
         .add_plugins((
             DefaultPlugins,
             // add an inspector for easily changing settings at runtime
-            WorldInspectorPlugin::default(),
+            // WorldInspectorPlugin::default(),
             // add the plugin
             TouchStickPlugin::<MyStick>::default(),
         ))
         .add_systems(Startup, setup)
-        .add_systems(Update, (update_stick_color, move_player))
+        .add_systems(Update, move_player)
         .run();
 }
 
@@ -45,47 +45,56 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 
     // spawn a touch stick
-    commands.spawn((
-        TouchStickBundle::new(TouchStickNode::<MyStick> {
-            border_image: asset_server.load("outline.png"),
-            knob_image: asset_server.load("knob.png"),
-            knob_size: Vec2::splat(80.),
+    commands
+        .spawn(TouchStickUiBundle::<MyStick> {
+            stick_node: TouchStickUi { id: MyStick },
+            style: Style {
+                width: Val::Px(150.),
+                height: Val::Px(150.),
+                align_self: AlignSelf::Center,
+                position_type: PositionType::Absolute,
+                margin: UiRect {
+                    left: Val::Auto,
+                    right: Val::Auto,
+                    ..default()
+                },
+                bottom: Val::Vw(15.),
+                ..default()
+            },
             ..default()
         })
-        .set_color(TintColor(Color::WHITE.with_a(0.2)))
-        .set_style(Style {
-            width: Val::Px(150.),
-            height: Val::Px(150.),
-            position_type: PositionType::Absolute,
-            left: Val::Percent(50.),
-            bottom: Val::Percent(15.),
-            ..default()
-        }),
-        // make it easy to see the area in which the stick can be interacted with
-        BackgroundColor(Color::WHITE.with_a(0.05)),
-    ));
-}
-
-fn update_stick_color(
-    mut stick_events: EventReader<TouchStickEvent<MyStick>>,
-    mut sticks: Query<(&mut TintColor, &TouchStickNode<MyStick>)>,
-) {
-    for event in stick_events.iter() {
-        let tint_color = match event.get_type() {
-            TouchStickEventType::Press | TouchStickEventType::Drag => TintColor(Color::WHITE),
-            TouchStickEventType::Release => TintColor(Color::WHITE.with_a(0.2)),
-        };
-
-        for (mut color, node) in &mut sticks {
-            if node.id == event.id() {
-                *color = tint_color;
-            }
-        }
-    }
+        .with_children(|parent| {
+            parent.spawn((
+                TouchStickUiKnob,
+                ImageBundle {
+                    image: asset_server.load("knob.png").into(),
+                    style: Style {
+                        width: Val::Px(75.),
+                        height: Val::Px(75.),
+                        ..default()
+                    },
+                    background_color: Color::ORANGE.with_a(0.3).into(),
+                    ..default()
+                },
+            ));
+            parent.spawn((
+                TouchStickUiOutline,
+                ImageBundle {
+                    image: asset_server.load("outline.png").into(),
+                    style: Style {
+                        width: Val::Px(150.),
+                        height: Val::Px(150.),
+                        ..default()
+                    },
+                    background_color: Color::ORANGE.with_a(0.3).into(),
+                    ..default()
+                },
+            ));
+        });
 }
 
 fn move_player(
-    sticks: Query<&TouchStick>,
+    sticks: Query<&TouchStick<MyStick>>,
     mut players: Query<(&mut Transform, &Player)>,
     time: Res<Time>,
 ) {

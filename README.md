@@ -8,7 +8,7 @@ Only two-axis sticks are supported.
 ## Goals
 
 - [x] Support mouse and touch
-- [x] Multiple joysticks on screen (for e.g. twin stick)
+- [ ] Multiple joysticks on screen (for e.g. twin stick)
 - [x] Emulate a regular bevy gamepad
 - [x] Minimal dependencies (including features)
 - [ ] Simple stupid implementation
@@ -17,9 +17,9 @@ Only two-axis sticks are supported.
 
 ## Examples
 
-- [`leafwing`](./examples/leafwing.rs) (recommended): Shows usage with [`leafwing-input-manager`](https://github.com/Leafwing-Studios/leafwing-input-manager)
+<!-- - [`leafwing`](./examples/leafwing.rs) (recommended): Shows usage with [`leafwing-input-manager`](https://github.com/Leafwing-Studios/leafwing-input-manager) -->
 - [`simple`](./examples/simple.rs)
-- [`multiple`](./examples/multiple.rs)
+<!-- - [`multiple`](./examples/multiple.rs) -->
 
 ## Usage
 
@@ -31,7 +31,7 @@ The `main` branch targets the latest bevy release.
 
 |bevy|bevy_touch_stick|
 |----|----------------|
-|0.11| main           |
+|0.12| main           |
 
 ## License
 
