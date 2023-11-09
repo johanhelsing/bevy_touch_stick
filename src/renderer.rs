@@ -2,7 +2,8 @@ use std::marker::PhantomData;
 
 use bevy::{
     prelude::*,
-    sprite::{Material2d, Material2dPlugin, MaterialMesh2dBundle},
+    render::render_resource::{AsBindGroup, ShaderRef},
+    sprite::{Material2d, Material2dPlugin},
 };
 
 use crate::StickIdType;
@@ -23,14 +24,15 @@ impl<S: StickIdType> Plugin for StickRendererPlugin<S> {
     }
 }
 
-pub struct CustomMaterial;
+#[derive(Asset, AsBindGroup, Clone, TypePath)]
+pub struct CustomMaterial {}
 
 impl Material2d for CustomMaterial {
     fn vertex_shader() -> ShaderRef {
-        "sprite_stick.wgsl"
+        "sprite_stick.wgsl".into()
     }
 
     fn fragment_shader() -> ShaderRef {
-        "sprite_stick.wgsl"
+        "sprite_stick.wgsl".into()
     }
 }

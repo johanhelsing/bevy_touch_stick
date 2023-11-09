@@ -6,6 +6,7 @@ mod behavior;
 #[cfg(feature = "gamepad_mapping")]
 mod gamepad;
 mod input;
+mod renderer;
 mod ui;
 
 pub mod prelude {
