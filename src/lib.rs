@@ -33,7 +33,7 @@ pub use crate::{
 };
 
 /// pure data, independent of bevy_ui
-#[derive(Component, Clone, Debug, Default, Reflect)]
+#[derive(Component, Clone, Debug, Reflect)]
 #[reflect(Component, Default)]
 pub struct TouchStick<S: StickIdType> {
     pub id: S,
@@ -53,6 +53,25 @@ pub struct TouchStick<S: StickIdType> {
     pub stick_type: TouchStickType,
 }
 
+impl<S: StickIdType> Default for TouchStick<S> {
+    fn default() -> Self {
+        Self {
+            id: default(),
+            drag_id: None,
+            dead_zone: 0.,
+            base_position: default(),
+            drag_start: default(),
+            drag_position: default(),
+            value: default(),
+            interactable_zone: Rect {
+                min: Vec2::MIN,
+                max: Vec2::MAX,
+            },
+            stick_type: default(),
+        }
+    }
+}
+
 impl<S: StickIdType> From<S> for TouchStick<S> {
     fn from(id: S) -> Self {
         Self::new(id)
@@ -63,17 +82,6 @@ impl<S: StickIdType> TouchStick<S> {
     pub fn new(id: S) -> Self {
         Self {
             id: id.into(),
-            // drag_id: None,
-            // dead_zone: 0.,
-            // base_position: default(),
-            // start_position: default(),
-            // current_position: default(),
-            // value: default(),
-            // interactable_zone: Rect {
-            //     min: Vec2::MIN,
-            //     max: Vec2::MAX,
-            // },
-            // stick_type: default(),
             ..default()
         }
     }
