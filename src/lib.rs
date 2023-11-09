@@ -80,10 +80,7 @@ impl<S: StickIdType> From<S> for TouchStick<S> {
 
 impl<S: StickIdType> TouchStick<S> {
     pub fn new(id: S) -> Self {
-        Self {
-            id: id.into(),
-            ..default()
-        }
+        Self { id, ..default() }
     }
 }
 

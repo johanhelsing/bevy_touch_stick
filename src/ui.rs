@@ -146,7 +146,7 @@ fn get_base_pos<S: StickIdType>(
         ..default()
     };
 
-    let border_pos = match stick.stick_type {
+    match stick.stick_type {
         TouchStickType::Fixed => global_transform
             .compute_matrix()
             .transform_point3((container_rect.center() - (uinode.size() / 2.)).extend(0.)),
@@ -160,7 +160,5 @@ fn get_base_pos<S: StickIdType>(
             }
         }
         TouchStickType::Dynamic => stick.base_position.extend(0.),
-    };
-
-    border_pos
+    }
 }
