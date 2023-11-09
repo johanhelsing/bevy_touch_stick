@@ -122,7 +122,7 @@ pub(crate) fn patch_stick_node<S: StickIdType>(
     outline_ui_query: Extract<Query<(Entity, &Parent), With<TouchStickUiOutline>>>,
     sticks: Extract<Query<&TouchStick<S>>>,
 ) {
-    let data = sticks.single();
+    let stick = sticks.single();
 
     for (knob_entity, knob_parent) in &knob_ui_query {
         if let Ok((uinode, global_transform, stick_ui, visibility)) =
@@ -140,24 +140,24 @@ pub(crate) fn patch_stick_node<S: StickIdType>(
                 };
 
                 let radius = uinode.size().x / 2.;
-                let axis_value = data.value;
+                let axis_value = stick.value;
                 // ui is y down, so we flip
                 let pos = Vec2::new(axis_value.x, -axis_value.y) * radius;
 
-                let knob_pos = match data.stick_type {
+                let knob_pos = match stick.stick_type {
                     TouchStickType::Fixed => global_transform.compute_matrix().transform_point3(
                         (container_rect.center() - (uinode.size() / 2.) + pos).extend(0.),
                     ),
                     TouchStickType::Floating => {
-                        if data.drag_id.is_none() {
+                        if stick.drag_id.is_none() {
                             global_transform.compute_matrix().transform_point3(
                                 (container_rect.center() - (uinode.size() / 2.)).extend(0.),
                             )
                         } else {
-                            (data.drag_start + pos).extend(0.)
+                            (stick.drag_start + pos).extend(0.)
                         }
                     }
-                    TouchStickType::Dynamic => (data.base_position + pos).extend(0.),
+                    TouchStickType::Dynamic => (stick.base_position + pos).extend(0.),
                 };
 
                 extracted_uinodes
@@ -181,20 +181,20 @@ pub(crate) fn patch_stick_node<S: StickIdType>(
             };
             // we have a knob
             if visibility.get() && uinode.size().x != 0. && uinode.size().y != 0. {
-                let border_pos = match data.stick_type {
+                let border_pos = match stick.stick_type {
                     TouchStickType::Fixed => global_transform.compute_matrix().transform_point3(
                         (container_rect.center() - (uinode.size() / 2.)).extend(0.),
                     ),
                     TouchStickType::Floating => {
-                        if data.drag_id.is_none() {
+                        if stick.drag_id.is_none() {
                             global_transform.compute_matrix().transform_point3(
                                 (container_rect.center() - (uinode.size() / 2.)).extend(0.),
                             )
                         } else {
-                            data.drag_start.extend(0.)
+                            stick.drag_start.extend(0.)
                         }
                     }
-                    TouchStickType::Dynamic => data.base_position.extend(0.),
+                    TouchStickType::Dynamic => stick.base_position.extend(0.),
                 };
 
                 extracted_uinodes
