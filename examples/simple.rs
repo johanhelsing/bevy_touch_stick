@@ -1,8 +1,6 @@
-use bevy::{prelude::*, ui::FocusPolicy};
+use bevy::prelude::*;
 // use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_touch_stick::{
-    prelude::*, TouchStickInteractionArea, TouchStickUiKnob, TouchStickUiOutline,
-};
+use bevy_touch_stick::{prelude::*, TouchStickUiKnob, TouchStickUiOutline};
 
 /// Marker type for our touch stick
 #[derive(Default, Reflect, Hash, Clone, PartialEq, Eq)]
@@ -28,11 +26,7 @@ struct Player {
     max_speed: f32,
 }
 
-fn setup(
-    mut commands: Commands,
-    mut materials: ResMut<Assets<CircleMaterial>>,
-    asset_server: Res<AssetServer>,
-) {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2dBundle {
         transform: Transform::from_xyz(0., 0., 5.0),
         ..default()
@@ -50,27 +44,10 @@ fn setup(
         },
     ));
 
-    // sticks are entities for now (could perhaps be resources)
-    // commands.spawn(TouchStick::<MyStick>::default());
-
-    // define the area on the screen where a touch stick can be interacted with
-    // todo: default to entire screen and remove from simple example?
-    // todo: make bundle?
-
     // spawn a touch stick
     commands
         .spawn(TouchStickUiBundle::<MyStick> {
-            // todo: provide default material
-            stick_node: TouchStickUi {
-                knob_image: asset_server.load("knob.png"),
-                border_image: asset_server.load("outline.png"),
-                knob_radius: 40.,
-                outline_radius: 80.,
-                ..default()
-            },
-            // material: materials.add(CircleMaterial {
-            //     color: Vec4::new(1., 0., 0., 1.),
-            // }),
+            stick_node: TouchStickUi { id: MyStick },
             style: Style {
                 width: Val::Px(150.),
                 height: Val::Px(150.),
@@ -92,8 +69,8 @@ fn setup(
                 ImageBundle {
                     image: asset_server.load("knob.png").into(),
                     style: Style {
-                        width: Val::Px(50.),
-                        height: Val::Px(50.),
+                        width: Val::Px(75.),
+                        height: Val::Px(75.),
                         ..default()
                     },
                     background_color: Color::ORANGE.with_a(0.3).into(),

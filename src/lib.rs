@@ -31,8 +31,8 @@ use crate::input::{
 pub use crate::{
     behavior::TouchStickType,
     ui::{
-        TouchStickInteractionArea, TouchStickUi, TouchStickUiBundle, TouchStickUiKnob,
-        TouchStickUiOutline,
+        CircleMaterial, TouchStickInteractionArea, TouchStickUi, TouchStickUiBundle,
+        TouchStickUiKnob, TouchStickUiOutline,
     },
 };
 
