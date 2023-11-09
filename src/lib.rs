@@ -6,6 +6,7 @@ mod behavior;
 #[cfg(feature = "gamepad_mapping")]
 mod gamepad;
 mod input;
+#[cfg(feature = "material2d")]
 mod renderer;
 mod ui;
 

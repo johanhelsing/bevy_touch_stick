@@ -14,6 +14,7 @@ default = ["serde", "gamepad_mapping"]
 serde = ["dep:serde"]
 # integrate with bevy as a gamepad
 gamepad_mapping = []
+material2d = []
 
 [dependencies]
 bevy = { version = "0.12", default-features = false, features = [
