@@ -48,17 +48,15 @@ fn setup(mut commands: Commands) {
 
     // only here soo the camera movement system makes sense
     // just an object
-    commands.spawn((
-        SpriteBundle {
-            sprite: Sprite {
-                color: Color::PINK,
-                custom_size: Some(Vec2::splat(50.)),
-                ..default()
-            },
-            transform: Transform::from_xyz(20.0, 60.0, 0.0),
+    commands.spawn((SpriteBundle {
+        sprite: Sprite {
+            color: Color::PINK,
+            custom_size: Some(Vec2::splat(50.)),
             ..default()
         },
-    ));
+        transform: Transform::from_xyz(20.0, 60.0, 0.0),
+        ..default()
+    },));
 
     commands.spawn((
         Player { max_speed: 50. },

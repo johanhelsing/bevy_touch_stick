@@ -107,5 +107,4 @@ fn move_camera(
     let axis_value = right_stick.single().value;
 
     camera_transform.translation += axis_value.extend(0.0) * time.delta_seconds()
-
 }

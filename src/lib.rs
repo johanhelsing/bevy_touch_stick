@@ -136,9 +136,16 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + TypePath 
 }
 
 /// uses `Transform` if `Node` has no `Parent`, else uses `GlobalTransform`
+#[allow(clippy::type_complexity)]
 fn map_input_zones_from_ui_nodes<S: StickIdType>(
     mut interaction_areas: Query<
-        (&mut TouchStick<S>, &GlobalTransform, &Transform, &Node, Option<&Parent>),
+        (
+            &mut TouchStick<S>,
+            &GlobalTransform,
+            &Transform,
+            &Node,
+            Option<&Parent>,
+        ),
         With<TouchStickInteractionArea>,
     >,
 ) {
