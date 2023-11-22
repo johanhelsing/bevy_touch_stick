@@ -2,23 +2,24 @@ use bevy::prelude::*;
 // use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_touch_stick::prelude::*;
 
-// ID for joysticks
+// ID for left joystick
 #[derive(Default, Reflect, Hash, Clone, PartialEq, Eq)]
-enum Stick {
-    #[default]
-    Left,
-    Right,
-}
+struct LeftStick;
+
+// ID for right joystick
+#[derive(Default, Reflect, Hash, Clone, PartialEq, Eq)]
+struct RightStick;
 
 fn main() {
     App::new()
         .add_plugins((
             DefaultPlugins,
             // WorldInspectorPlugin::new(),
-            TouchStickPlugin::<Stick>::default(),
+            TouchStickPlugin::<LeftStick>::default(),
+            TouchStickPlugin::<RightStick>::default(),
         ))
         .add_systems(Startup, create_scene)
-        .add_systems(Update, move_player)
+        .add_systems(Update, (move_player, move_camera))
         .run();
 }
 
@@ -53,7 +54,7 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // Spawn Virtual Joystick on left
     commands.spawn(TouchStickUiBundle {
-        stick: Stick::Left.into(),
+        stick: LeftStick.into(),
         style: Style {
             width: Val::Px(150.),
             height: Val::Px(150.),
@@ -67,7 +68,7 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // Spawn Virtual Joystick on Right
     commands.spawn(TouchStickUiBundle {
-        stick: Stick::Right.into(),
+        stick: RightStick.into(),
         style: Style {
             width: Val::Px(150.),
             height: Val::Px(150.),
@@ -81,25 +82,30 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn move_player(
-    sticks: Query<&TouchStick<Stick>>,
+    left_stick: Query<&TouchStick<LeftStick>>,
     mut players: Query<(&mut Transform, &Player)>,
     time: Res<Time>,
 ) {
     let (mut player_transform, player) = players.single_mut();
+    let stick = left_stick.single();
 
-    for stick in &sticks {
-        let Vec2 { x, y } = stick.value;
+    let Vec2 { x, y } = stick.value;
 
-        let dt = time.delta_seconds();
+    let dt = time.delta_seconds();
 
-        // todo: maybe it's more interesting to set player direction per stick instead?
-        match stick.id {
-            Stick::Left => {
-                player_transform.translation.x += x * player.max_speed * dt;
-            }
-            Stick::Right => {
-                player_transform.translation.y += y * player.max_speed * dt;
-            }
-        }
-    }
+    // todo: maybe it's more interesting to set player direction per stick instead?
+    player_transform.translation.x += x * player.max_speed * dt;
+    player_transform.translation.y += y * player.max_speed * dt;
+}
+
+fn move_camera(
+    right_stick: Query<&TouchStick<RightStick>>,
+    mut camera: Query<&mut Transform, With<Camera2d>>,
+    time: Res<Time>,
+) {
+    let mut camera_transform = camera.single_mut();
+    let axis_value = right_stick.single().value;
+
+    camera_transform.translation += axis_value.extend(0.0) * time.delta_seconds()
+
 }

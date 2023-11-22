@@ -39,7 +39,9 @@ pub struct TouchStick<S: StickIdType> {
     pub id: S,
     pub drag_id: Option<u64>,
     pub dead_zone: f32,
-    /// todo: only used for dynamic mode
+    /// only applies too `TouchStickType::Dynamic`
+    ///
+    /// position of ui node after `Drag``. Vec2::ZERO if `Release`
     pub base_position: Vec2,
     /// The screen position where the drag was started
     pub drag_start: Vec2,
@@ -133,20 +135,23 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + TypePath 
 {
 }
 
+/// uses `Transform` if `Node` has no `Parent`, else uses `GlobalTransform`
 fn map_input_zones_from_ui_nodes<S: StickIdType>(
-    interaction_areas: Query<(&Transform, &Node), With<TouchStickInteractionArea>>,
-    mut sticks: Query<&mut TouchStick<S>>,
+    mut interaction_areas: Query<
+        (&mut TouchStick<S>, &GlobalTransform, &Transform, &Node, Option<&Parent>),
+        With<TouchStickInteractionArea>,
+    >,
 ) {
-    for (transform, node) in &interaction_areas {
+    for (mut touch_stick, global_transform, transform, node, parent) in &mut interaction_areas {
         // todo: match stick ids!
-
-        let pos = transform.translation.truncate();
+        let pos = if parent.is_some() {
+            global_transform.translation().truncate()
+        } else {
+            transform.translation.truncate()
+        };
         let size = node.size();
         let interaction_area = Rect::from_center_size(pos, size);
-
-        for mut stick in sticks.iter_mut() {
-            stick.interactable_zone = interaction_area;
-        }
+        touch_stick.interactable_zone = interaction_area;
     }
 }
 

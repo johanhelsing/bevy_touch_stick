@@ -46,8 +46,12 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // spawn a touch stick
     commands
-        .spawn(TouchStickUiBundle::<MyStick> {
-            stick_node: TouchStickUi { id: MyStick },
+        .spawn(TouchStickUiBundle {
+            stick: TouchStick {
+                id: MyStick,
+                stick_type: TouchStickType::Dynamic,
+                ..default()
+            },
             style: Style {
                 width: Val::Px(150.),
                 height: Val::Px(150.),
@@ -67,7 +71,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn((
                 TouchStickUiKnob,
                 ImageBundle {
-                    image: asset_server.load("knob.png").into(),
+                    image: asset_server.load("Knob.png").into(),
                     style: Style {
                         width: Val::Px(75.),
                         height: Val::Px(75.),
@@ -80,7 +84,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn((
                 TouchStickUiOutline,
                 ImageBundle {
-                    image: asset_server.load("outline.png").into(),
+                    image: asset_server.load("Outline.png").into(),
                     style: Style {
                         width: Val::Px(150.),
                         height: Val::Px(150.),

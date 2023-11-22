@@ -8,7 +8,7 @@ Only two-axis sticks are supported.
 ## Goals
 
 - [x] Support mouse and touch
-- [ ] Multiple joysticks on screen (for e.g. twin stick)
+- [x] Multiple joysticks on screen (For e.g. twin stick. Currently needs seperate instances of plugin)
 - [x] Emulate a regular bevy gamepad
 - [x] Minimal dependencies (including features)
 - [ ] Simple stupid implementation
