@@ -138,19 +138,13 @@ fn map_input_zones_from_ui_nodes<S: StickIdType>(
         (
             &mut TouchStick<S>,
             &GlobalTransform,
-            &Transform,
             &Node,
-            Option<&Parent>,
         ),
         With<TouchStickInteractionArea>,
     >,
 ) {
-    for (mut touch_stick, global_transform, transform, node, parent) in &mut interaction_areas {
-        let pos = if parent.is_some() {
-            global_transform.translation().truncate()
-        } else {
-            transform.translation.truncate()
-        };
+    for (mut touch_stick,  transform, node) in &mut interaction_areas {
+        let pos = transform.translation().truncate();
         let size = node.size();
         let interaction_area = Rect::from_center_size(pos, size);
         touch_stick.interactable_zone = interaction_area;
