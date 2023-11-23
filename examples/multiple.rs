@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-// use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_touch_stick::prelude::*;
 
 // ID for joysticks
@@ -14,7 +14,7 @@ fn main() {
     App::new()
         .add_plugins((
             DefaultPlugins,
-            // WorldInspectorPlugin::new(),
+            WorldInspectorPlugin::new(),
             TouchStickPlugin::<Stick>::default(),
         ))
         .add_systems(Startup, create_scene)
