@@ -134,19 +134,26 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + TypePath 
 }
 
 fn map_input_zones_from_ui_nodes<S: StickIdType>(
-    interaction_areas: Query<(&Transform, &Node), With<TouchStickInteractionArea>>,
-    mut sticks: Query<&mut TouchStick<S>>,
+    mut interaction_areas: Query<
+        (
+            &mut TouchStick<S>,
+            &GlobalTransform,
+            &Transform,
+            &Node,
+            Option<&Parent>,
+        ),
+        With<TouchStickInteractionArea>,
+    >,
 ) {
-    for (transform, node) in &interaction_areas {
-        // todo: match stick ids!
-
-        let pos = transform.translation.truncate();
+    for (mut touch_stick, global_transform, transform, node, parent) in &mut interaction_areas {
+        let pos = if parent.is_some() {
+            global_transform.translation().truncate()
+        } else {
+            transform.translation.truncate()
+        };
         let size = node.size();
         let interaction_area = Rect::from_center_size(pos, size);
-
-        for mut stick in sticks.iter_mut() {
-            stick.interactable_zone = interaction_area;
-        }
+        touch_stick.interactable_zone = interaction_area;
     }
 }
 
