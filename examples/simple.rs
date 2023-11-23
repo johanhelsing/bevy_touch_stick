@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-// use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_touch_stick::{prelude::*, TouchStickUiKnob, TouchStickUiOutline};
 
 /// Marker type for our touch stick
@@ -12,7 +12,7 @@ fn main() {
         .add_plugins((
             DefaultPlugins,
             // add an inspector for easily changing settings at runtime
-            // WorldInspectorPlugin::default(),
+            WorldInspectorPlugin::default(),
             // add the plugin
             TouchStickPlugin::<MyStick>::default(),
         ))
