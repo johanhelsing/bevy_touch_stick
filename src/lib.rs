@@ -135,15 +135,11 @@ impl<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + TypePath 
 
 fn map_input_zones_from_ui_nodes<S: StickIdType>(
     mut interaction_areas: Query<
-        (
-            &mut TouchStick<S>,
-            &GlobalTransform,
-            &Node,
-        ),
+        (&mut TouchStick<S>, &GlobalTransform, &Node),
         With<TouchStickInteractionArea>,
     >,
 ) {
-    for (mut touch_stick,  transform, node) in &mut interaction_areas {
+    for (mut touch_stick, transform, node) in &mut interaction_areas {
         let pos = transform.translation().truncate();
         let size = node.size();
         let interaction_area = Rect::from_center_size(pos, size);
