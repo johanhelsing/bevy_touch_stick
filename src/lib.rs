@@ -4,6 +4,8 @@
 //!
 //! ## Example
 //!```no_run
+// # use bevy::prelude::*;
+// use bevy_touch_stick::prelude::*
 //! commands.spawn((
 //!     BackgroundColor(Color::BLUE),
 //!     TouchStickUiBundle {
@@ -67,7 +69,7 @@ use crate::{
 #[derive(Component, Clone, Debug, Reflect)]
 #[reflect(Component, Default)]
 pub struct TouchStick<S: StickIdType> {
-    /// type used for identifying this `TouchStick`
+    /// Type used for identifying this [`TouchStick`]
     pub id: S,
     /// what drag event sequence is currently affecting this `TouchStick`
     pub drag_id: Option<u64>,
@@ -75,7 +77,7 @@ pub struct TouchStick<S: StickIdType> {
     pub dead_zone: f32,
     /// last drag positon of touchstick. only applies too `TouchStickType::Dynamic`
     ///
-    /// Vec2::ZERO if node is released
+    /// `Vec2::ZERO` if node is released
     pub base_position: Vec2,
     /// The screen position where the drag was started
     pub drag_start: Vec2,
@@ -115,15 +117,13 @@ impl<S: StickIdType> From<S> for TouchStick<S> {
 }
 
 impl<S: StickIdType> TouchStick<S> {
-    /// creates a new `TouchStick` with `s` as `StickIdType`
+    /// creates a new `TouchStick` with the given id.
     pub fn new(id: S) -> Self {
         Self { id, ..default() }
     }
 }
 
 /// plugin holding `TouchStick` functionality
-///
-/// add 1 per `TouchStick` your trying too spawn
 pub struct TouchStickPlugin<S> {
     _marker: PhantomData<S>,
 }
@@ -212,7 +212,7 @@ pub struct TouchStickEvent<S: StickIdType> {
 }
 
 impl<S: StickIdType> TouchStickEvent<S> {
-    /// returns the stick id that sent the event
+    /// Returns the id for the stick that sent the event
     pub fn id(&self) -> S {
         self.id.clone()
     }

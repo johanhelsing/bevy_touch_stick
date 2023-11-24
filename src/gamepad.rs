@@ -40,7 +40,9 @@ const TOUCH_GAMEPAD: Gamepad = Gamepad {
     id: TOUCH_GAMEPAD_ID,
 };
 
-/// mapping of touchstick x/y values too gamepad axis x/y values
+/// Mapping of a [`TouchStick`] to bevy gamepad axes.
+///
+/// Adding this component to a `TouchStick` will create an emulated gamepad through `bevy_input`.
 #[derive(Component, Reflect, Clone, Copy, Debug, Eq, PartialEq)]
 pub struct TouchStickGamepadMapping(pub GamepadAxisType, pub GamepadAxisType);
 
