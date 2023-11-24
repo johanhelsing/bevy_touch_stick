@@ -66,7 +66,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn((
                 TouchStickUiKnob,
                 ImageBundle {
-                    image: asset_server.load("Knob.png").into(),
+                    image: asset_server.load("knob.png").into(),
                     style: Style {
                         width: Val::Px(75.),
                         height: Val::Px(75.),
@@ -78,7 +78,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn((
                 TouchStickUiOutline,
                 ImageBundle {
-                    image: asset_server.load("Outline.png").into(),
+                    image: asset_server.load("outline.png").into(),
                     style: Style {
                         width: Val::Px(150.),
                         height: Val::Px(150.),
