@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_touch_stick::prelude::*;
+use bevy_touch_stick::{prelude::*, TouchStickUiKnob, TouchStickUiOutline};
 
 // ID for joysticks
 #[derive(Default, Reflect, Hash, Clone, PartialEq, Eq)]
@@ -41,9 +41,8 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
                 translation: Vec3::new(0., 0., 0.),
                 ..default()
             },
-            texture: asset_server.load("knob.png"),
+            texture: asset_server.load("Knob.png"),
             sprite: Sprite {
-                color: Color::PURPLE,
                 custom_size: Some(Vec2::new(50., 50.)),
                 ..default()
             },
@@ -51,33 +50,117 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
     ));
 
-    // Spawn Virtual Joystick on left
-    commands.spawn(TouchStickUiBundle {
-        stick: Stick::Left.into(),
-        style: Style {
-            width: Val::Px(150.),
-            height: Val::Px(150.),
-            position_type: PositionType::Absolute,
-            left: Val::Px(35.),
-            bottom: Val::Percent(15.),
-            ..default()
-        },
-        ..default()
-    });
+    // you dont have too spawn these parented too an interface node
+    // this just allows you too hide the controls easier
+    // say you were in the StartMenu
+    // you can just hide your game controls via root nodes Style component
+    commands
+        .spawn((
+            Name::new("TouchControlsRoot"),
+            NodeBundle {
+                style: Style {
+                    width: Val::Vw(100.0),
+                    height: Val::Vh(100.0),
+                    ..default()
+                },
+                ..default()
+            },
+        ))
+        .with_children(|child_builder| {
+            // Spawn TouchStick on Left
+            child_builder
+                .spawn((
+                    TouchStickUiBundle {
+                        stick: TouchStick {
+                            id: Stick::Left,
+                            stick_type: TouchStickType::Fixed,
+                            ..default()
+                        },
+                        style: Style {
+                            width: Val::Px(150.),
+                            height: Val::Px(150.),
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(35.),
+                            bottom: Val::Percent(15.),
+                            ..default()
+                        },
+                        ..default()
+                    },
+                ))
+                .with_children(|parent| {
+                    parent.spawn((
+                        TouchStickUiKnob,
+                        ImageBundle {
+                            image: asset_server.load("Knob.png").into(),
+                            style: Style {
+                                width: Val::Px(75.),
+                                height: Val::Px(75.),
+                                ..default()
+                            },
+                            ..default()
+                        },
+                    ));
+                    parent.spawn((
+                        TouchStickUiOutline,
+                        ImageBundle {
+                            image: asset_server.load("Outline.png").into(),
+                            style: Style {
+                                width: Val::Px(150.),
+                                height: Val::Px(50.),
+                                ..default()
+                            },
+                            ..default()
+                        },
+                    ));
+                });
 
-    // Spawn Virtual Joystick on Right
-    commands.spawn(TouchStickUiBundle {
-        stick: Stick::Right.into(),
-        style: Style {
-            width: Val::Px(150.),
-            height: Val::Px(150.),
-            position_type: PositionType::Absolute,
-            right: Val::Px(35.),
-            bottom: Val::Percent(15.),
-            ..default()
-        },
-        ..default()
-    });
+            // Spawn TouchStick on Right
+            child_builder
+                .spawn((TouchStickUiBundle {
+                    stick: TouchStick {
+                        id: Stick::Right,
+                        stick_type: TouchStickType::Fixed,
+                        ..default()
+                    },
+                    // Stick::Right.into(),
+                    style: Style {
+                        width: Val::Px(150.),
+                        height: Val::Px(150.),
+                        position_type: PositionType::Absolute,
+                        right: Val::Px(35.),
+                        bottom: Val::Percent(15.),
+                        ..default()
+                    },
+                    ..default()
+                },))
+                .with_children(|parent| {
+                    parent.spawn((
+                        TouchStickUiKnob,
+                        ImageBundle {
+                            image: asset_server.load("Knob.png").into(),
+                            style: Style {
+                                width: Val::Px(75.),
+                                height: Val::Px(75.),
+                                ..default()
+                            },
+                            ..default()
+                        },
+                    ));
+                    parent.spawn((
+                        TouchStickUiOutline,
+                        ImageBundle {
+                            image: asset_server.load("Outline.png").into(),
+                            style: Style {
+                                width: Val::Px(50.),
+                                height: Val::Px(150.),
+                                ..default()
+                            },
+                            ..default()
+                        },
+                    ));
+                });
+        });
+    // Spawn Virtual Joystick on left
 }
 
 fn move_player(
