@@ -69,24 +69,22 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
         .with_children(|child_builder| {
             // Spawn TouchStick on Left
             child_builder
-                .spawn((
-                    TouchStickUiBundle {
-                        stick: TouchStick {
-                            id: Stick::Left,
-                            stick_type: TouchStickType::Fixed,
-                            ..default()
-                        },
-                        style: Style {
-                            width: Val::Px(150.),
-                            height: Val::Px(150.),
-                            position_type: PositionType::Absolute,
-                            left: Val::Px(35.),
-                            bottom: Val::Percent(15.),
-                            ..default()
-                        },
+                .spawn((TouchStickUiBundle {
+                    stick: TouchStick {
+                        id: Stick::Left,
+                        stick_type: TouchStickType::Fixed,
                         ..default()
                     },
-                ))
+                    style: Style {
+                        width: Val::Px(150.),
+                        height: Val::Px(150.),
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(35.),
+                        bottom: Val::Percent(15.),
+                        ..default()
+                    },
+                    ..default()
+                },))
                 .with_children(|parent| {
                     parent.spawn((
                         TouchStickUiKnob,
