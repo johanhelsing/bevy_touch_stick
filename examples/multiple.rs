@@ -23,7 +23,6 @@ fn main() {
 }
 
 #[derive(Component)]
-// Player with velocity
 struct Player {
     pub max_speed: f32,
 }
@@ -41,7 +40,6 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
                 translation: Vec3::new(0., 0., 0.),
                 ..default()
             },
-            texture: asset_server.load("Knob.png"),
             sprite: Sprite {
                 custom_size: Some(Vec2::new(50., 50.)),
                 ..default()
@@ -50,10 +48,10 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
     ));
 
-    // you dont have too spawn these parented too an interface node
-    // this just allows you too hide the controls easier
-    // say you were in the StartMenu
-    // you can just hide your game controls via root nodes Style component
+    // Note: you don't have to spawn these parented to an interface node this
+    // just allows you too hide the controls easier. For instance, if you pause
+    // the game, you can just hide your game controls via the root node's
+    // `Style` component.
     commands
         .spawn((
             Name::new("TouchControlsRoot"),
@@ -67,9 +65,9 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
         ))
         .with_children(|child_builder| {
-            // Spawn TouchStick on Left
+            // Spawn left touch stick
             child_builder
-                .spawn((TouchStickUiBundle {
+                .spawn(TouchStickUiBundle {
                     stick: TouchStick {
                         id: Stick::Left,
                         stick_type: TouchStickType::Fixed,
@@ -84,7 +82,7 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
                         ..default()
                     },
                     ..default()
-                },))
+                })
                 .with_children(|parent| {
                     parent.spawn((
                         TouchStickUiKnob,
@@ -112,15 +110,14 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
                     ));
                 });
 
-            // Spawn TouchStick on Right
+            // Spawn right touch stick
             child_builder
-                .spawn((TouchStickUiBundle {
+                .spawn(TouchStickUiBundle {
                     stick: TouchStick {
                         id: Stick::Right,
                         stick_type: TouchStickType::Fixed,
                         ..default()
                     },
-                    // Stick::Right.into(),
                     style: Style {
                         width: Val::Px(150.),
                         height: Val::Px(150.),
@@ -130,7 +127,7 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
                         ..default()
                     },
                     ..default()
-                },))
+                })
                 .with_children(|parent| {
                     parent.spawn((
                         TouchStickUiKnob,
@@ -158,7 +155,6 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
                     ));
                 });
         });
-    // Spawn Virtual Joystick on left
 }
 
 fn move_player(
