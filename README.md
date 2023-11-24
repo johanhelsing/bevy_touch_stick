@@ -4,11 +4,13 @@ Virtual touch screen analog joysticks for the [Bevy](https://bevyengine.org/)
 game engine.
 
 Only two-axis sticks are supported.
+Single axis sticks work if you manually collect the joystick value (the joystick will still output both axis, and move along both axis).
+Supports multiple joysticks if you add the plugin for each joystick
 
 ## Goals
 
 - [x] Support mouse and touch
-- [ ] Multiple joysticks on screen (for e.g. twin stick)
+- [x] Multiple joysticks on screen (for e.g. twin stick)
 - [x] Emulate a regular bevy gamepad
 - [x] Minimal dependencies (including features)
 - [ ] Simple stupid implementation
