@@ -3,7 +3,7 @@
 //! see the examples for more detailed usage
 //!
 //! ## Example
-//!```
+//!```no_run
 //! commands.spawn((
 //!     BackgroundColor(Color::BLUE),
 //!     TouchStickUiBundle {
