@@ -67,7 +67,7 @@ use crate::{
 #[derive(Component, Clone, Debug, Reflect)]
 #[reflect(Component, Default)]
 pub struct TouchStick<S: StickIdType> {
-    /// Enum used for identifying the `TouchStick`
+    /// type used for identifying this `TouchStick`
     pub id: S,
     /// what drag event sequence is currently affecting this `TouchStick`
     pub drag_id: Option<u64>,
@@ -163,7 +163,7 @@ impl<S: StickIdType> Plugin for TouchStickPlugin<S> {
     }
 }
 
-/// type definition for TouchStickType
+/// type definition for TouchStick identifier
 pub trait StickIdType:
     Hash + Sync + Send + Clone + Default + Reflect + FromReflect + TypePath + 'static
 {
