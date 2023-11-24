@@ -121,7 +121,7 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
                             image: asset_server.load("outline.png").into(),
                             style: Style {
                                 width: Val::Px(150.),
-                                height: Val::Px(50.),
+                                height: Val::Px(150.),
                                 ..default()
                             },
                             ..default()
@@ -167,7 +167,7 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
                         ImageBundle {
                             image: asset_server.load("outline.png").into(),
                             style: Style {
-                                width: Val::Px(50.),
+                                width: Val::Px(150.),
                                 height: Val::Px(150.),
                                 ..default()
                             },
