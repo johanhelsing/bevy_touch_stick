@@ -22,10 +22,14 @@ pub struct TouchStickUiKnob;
 pub struct TouchStickUiOutline;
 
 // TODO: default returns a broken bundle, should remove or fix
+/// Touch stick ui bundle for easy spawning
 #[derive(Bundle, Debug, Default)]
 pub struct TouchStickUiBundle<S: StickIdType> {
+    /// data describing the `TouchStick` state
     pub stick: TouchStick<S>,
+    /// marker component
     pub stick_node: TouchStickUi<S>,
+    /// where this node will accept touch input
     pub interaction_area: TouchStickInteractionArea,
     /// Describes the size of the node
     pub node: Node,
@@ -47,14 +51,15 @@ pub struct TouchStickUiBundle<S: StickIdType> {
     pub view_visibility: ViewVisibility,
     /// Indicates the depth at which the node should appear in the UI
     pub z_index: ZIndex,
+    /// cursor position relative too the `TouchStick` in normalized logical pixels
     pub cursor_pos: RelativeCursorPosition,
 }
 
-/// bevy ui config for a stick
+/// marker component containing `TouchStickId`
 #[derive(Component, Clone, Debug, Default, Reflect)]
 #[reflect(Component, Default)]
 pub struct TouchStickUi<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static> {
-    /// Identifier of joystick
+    /// Identifier for `TouchStick`
     pub id: S,
 }
 

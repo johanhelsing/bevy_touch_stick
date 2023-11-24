@@ -1,6 +1,32 @@
+//! Virtual touch screen analog joysticks for the Bevy game engine.
+//!
+//! see the examples for more detailed usage
+//!
+//! ## Example
+//!```
+//! commands.spawn((
+//!     BackgroundColor(Color::BLUE),
+//!     TouchStickUiBundle {
+//!         stick: TouchStick {
+//!             id: Stick::Right,
+//!             stick_type: TouchStickType::Dynamic,
+//!             ..default()
+//!         },
+//!         style: Style {
+//!             width: Val::Px(150.),
+//!             height: Val::Px(150.),
+//!             position_type: PositionType::Absolute,
+//!             right: Val::Px(35.),
+//!             bottom: Val::Percent(15.),
+//!             ..default()
+//!         },
+//!         ..default()
+//!     }
+//! ));
+//!```
+//!
 use bevy::{prelude::*, reflect::TypePath, ui::UiSystem};
 use std::{hash::Hash, marker::PhantomData};
-use ui::TouchStickUiPlugin;
 
 mod behavior;
 #[cfg(feature = "gamepad_mapping")]
@@ -8,6 +34,7 @@ mod gamepad;
 mod input;
 mod ui;
 
+/// commonly used exports from this crate
 pub mod prelude {
     #[cfg(feature = "gamepad_mapping")]
     pub use crate::TouchStickGamepadMapping;
@@ -20,10 +47,7 @@ pub mod prelude {
 use crate::gamepad::GamepadMappingPlugin;
 #[cfg(feature = "gamepad_mapping")]
 pub use crate::gamepad::TouchStickGamepadMapping;
-use crate::input::{
-    send_drag_events_from_mouse, send_drag_events_from_touch, update_sticks_from_drag_events,
-    DragEvent,
-};
+
 pub use crate::{
     behavior::TouchStickType,
     ui::{
@@ -31,15 +55,27 @@ pub use crate::{
         TouchStickUiOutline,
     },
 };
+use crate::{
+    input::{
+        send_drag_events_from_mouse, send_drag_events_from_touch, update_sticks_from_drag_events,
+        DragEvent,
+    },
+    ui::TouchStickUiPlugin,
+};
 
 /// pure data, independent of bevy_ui
 #[derive(Component, Clone, Debug, Reflect)]
 #[reflect(Component, Default)]
 pub struct TouchStick<S: StickIdType> {
+    /// Enum used for identifying the `TouchStick`
     pub id: S,
+    /// what drag event sequence is currently affecting this `TouchStick`
     pub drag_id: Option<u64>,
+    /// values smaller than this will not send `TouchStickEvent`
     pub dead_zone: f32,
-    /// todo: only used for dynamic mode
+    /// last drag positon of touchstick. only applies too `TouchStickType::Dynamic`
+    ///
+    /// Vec2::ZERO if node is released
     pub base_position: Vec2,
     /// The screen position where the drag was started
     pub drag_start: Vec2,
@@ -49,7 +85,7 @@ pub struct TouchStick<S: StickIdType> {
     pub value: Vec2,
     /// In input space (y-down)
     pub interactable_zone: Rect,
-    /// Define the behavior of joystick
+    /// Defines the positioning behavior of the `TouchStick`
     pub stick_type: TouchStickType,
 }
 
@@ -79,11 +115,15 @@ impl<S: StickIdType> From<S> for TouchStick<S> {
 }
 
 impl<S: StickIdType> TouchStick<S> {
+    /// creates a new `TouchStick` with `s` as `StickIdType`
     pub fn new(id: S) -> Self {
         Self { id, ..default() }
     }
 }
 
+/// plugin holding `TouchStick` functionality
+///
+/// add 1 per `TouchStick` your trying too spawn
 pub struct TouchStickPlugin<S> {
     _marker: PhantomData<S>,
 }
@@ -123,6 +163,7 @@ impl<S: StickIdType> Plugin for TouchStickPlugin<S> {
     }
 }
 
+/// type definition for TouchStickType
 pub trait StickIdType:
     Hash + Sync + Send + Clone + Default + Reflect + FromReflect + TypePath + 'static
 {
@@ -150,14 +191,19 @@ fn map_input_zones_from_ui_nodes<S: StickIdType>(
     }
 }
 
+/// what action the TouchStick is experiencing
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Reflect)]
 #[reflect]
 pub enum TouchStickEventType {
+    /// `TouchStick` was activated
     Press,
+    /// `TouchStick` was moved
     Drag,
+    /// `TouchStick` was deactivated
     Release,
 }
 
+/// event sent whenever the touchstick is interacted.
 #[derive(Event)]
 pub struct TouchStickEvent<S: StickIdType> {
     id: S,
@@ -166,7 +212,7 @@ pub struct TouchStickEvent<S: StickIdType> {
 }
 
 impl<S: StickIdType> TouchStickEvent<S> {
-    /// Get Id of joystick throw event
+    /// returns the stick id that sent the event
     pub fn id(&self) -> S {
         self.id.clone()
     }

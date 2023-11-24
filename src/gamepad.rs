@@ -40,12 +40,15 @@ const TOUCH_GAMEPAD: Gamepad = Gamepad {
     id: TOUCH_GAMEPAD_ID,
 };
 
+/// mapping of touchstick x/y values too gamepad axis x/y values
 #[derive(Component, Reflect, Clone, Copy, Debug, Eq, PartialEq)]
 pub struct TouchStickGamepadMapping(pub GamepadAxisType, pub GamepadAxisType);
 
 impl TouchStickGamepadMapping {
+    /// defines default left stick mapping
     pub const LEFT_STICK: Self =
         TouchStickGamepadMapping(GamepadAxisType::LeftStickX, GamepadAxisType::LeftStickY);
+    /// defines default right stick mapping
     pub const RIGHT_STICK: Self =
         TouchStickGamepadMapping(GamepadAxisType::RightStickX, GamepadAxisType::RightStickY);
 }

@@ -8,6 +8,7 @@ use bevy::{
 };
 
 #[derive(Event)]
+/// actual device input passed too `TouchSticks`
 pub(crate) enum DragEvent {
     Start { id: u64, position: Vec2 },
     Drag { id: u64, position: Vec2 },
