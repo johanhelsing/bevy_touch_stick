@@ -81,8 +81,8 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ..default()
             },
         ))
-        .with_children(|child_builder| {
-            child_builder
+        .with_children(|parent| {
+            parent
                 .spawn((
                     Name::new("LeftTouchStick"),
                     TouchStickUiBundle {
@@ -129,8 +129,7 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
                     ));
                 });
 
-            // Spawn right touch stick
-            child_builder
+            parent
                 .spawn((
                     Name::new("RightTouchStick"),
                     TouchStickUiBundle {
