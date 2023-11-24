@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_touch_stick::{prelude::*, TouchStickUiKnob, TouchStickUiOutline};
+use std::f32::consts::PI;
 
 // ID for joysticks
 #[derive(Default, Reflect, Hash, Clone, PartialEq, Eq)]
@@ -33,20 +34,36 @@ fn create_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
         ..default()
     });
 
-    commands.spawn((
-        Player { max_speed: 50. },
-        SpriteBundle {
-            transform: Transform {
-                translation: Vec3::new(0., 0., 0.),
+    commands
+        .spawn((
+            Player { max_speed: 50. },
+            SpriteBundle {
+                transform: Transform {
+                    translation: Vec3::new(0., 0., 0.),
+                    ..default()
+                },
+                sprite: Sprite {
+                    custom_size: Some(Vec2::new(30., 50.)),
+                    ..default()
+                },
                 ..default()
             },
-            sprite: Sprite {
-                custom_size: Some(Vec2::new(50., 50.)),
+        ))
+        .with_children(|parent| {
+            // pointy "nose" for player
+            parent.spawn(SpriteBundle {
+                transform: Transform {
+                    translation: Vec3::new(15., 0., 0.),
+                    rotation: Quat::from_rotation_z(PI / 4.),
+                    ..default()
+                },
+                sprite: Sprite {
+                    custom_size: Some(Vec2::splat(50. / f32::sqrt(2.))),
+                    ..default()
+                },
                 ..default()
-            },
-            ..default()
-        },
-    ));
+            });
+        });
 
     // Note: you don't have to spawn these parented to an interface node this
     // just allows you too hide the controls easier. For instance, if you pause
@@ -170,17 +187,19 @@ fn move_player(
     let (mut player_transform, player) = players.single_mut();
 
     for stick in &sticks {
-        let Vec2 { x, y } = stick.value;
-
         let dt = time.delta_seconds();
 
-        // todo: maybe it's more interesting to set player direction per stick instead?
         match stick.id {
             Stick::Left => {
-                player_transform.translation.x += x * player.max_speed * dt;
+                let delta = stick.value * player.max_speed * dt;
+                player_transform.translation.x += delta.x;
+                player_transform.translation.y += delta.y;
             }
             Stick::Right => {
-                player_transform.translation.y += y * player.max_speed * dt;
+                if stick.value != Vec2::ZERO {
+                    let dir = Vec2::angle_between(Vec2::X, stick.value.normalize());
+                    player_transform.rotation = Quat::from_rotation_z(dir);
+                }
             }
         }
     }
