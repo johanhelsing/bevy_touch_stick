@@ -26,7 +26,7 @@ fn main() {
             DefaultPlugins,
             // add an inspector for easily changing settings at runtime
             WorldInspectorPlugin::default(),
-            // add plugin for each dual axis you want
+            // add the plugin
             TouchStickPlugin::<Stick>::default(),
             // add leafwing plugin
             InputManagerPlugin::<Action>::default(),
