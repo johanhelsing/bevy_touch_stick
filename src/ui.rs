@@ -165,6 +165,6 @@ fn get_base_pos<S: StickIdType>(
             } else {
                 stick.base_position.extend(0.)
             }
-        } //stick.base_position.extend(0.),
+        }
     }
 }
