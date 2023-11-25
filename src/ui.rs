@@ -49,7 +49,7 @@ pub struct TouchStickUiBundle<S: StickIdType> {
     pub view_visibility: ViewVisibility,
     /// Indicates the depth at which the node should appear in the UI
     pub z_index: ZIndex,
-    /// Cursor position relative too the [`TouchStick`] in normalized logical pixels
+    /// Cursor position relative to the [`TouchStick`] in normalized logical pixels
     pub cursor_pos: RelativeCursorPosition,
 }
 
