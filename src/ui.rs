@@ -65,9 +65,8 @@ impl<S: StickIdType> Default for TouchStickUiPlugin<S> {
 
 impl<S: StickIdType> Plugin for TouchStickUiPlugin<S> {
     fn build(&self, app: &mut App) {
-        let render_app = match app.get_sub_app_mut(RenderApp) {
-            Ok(render_app) => render_app,
-            Err(_) => return,
+        let Ok(render_app) = app.get_sub_app_mut(RenderApp) else {
+            return;
         };
         render_app.add_systems(
             ExtractSchedule,
@@ -79,21 +78,12 @@ impl<S: StickIdType> Plugin for TouchStickUiPlugin<S> {
 #[allow(clippy::type_complexity)]
 pub(crate) fn patch_stick_node<S: StickIdType>(
     mut extracted_uinodes: ResMut<ExtractedUiNodes>,
-    uinode_query: Extract<
-        Query<(
-            &Node,
-            &GlobalTransform,
-            &TouchStick<S>,
-            &ViewVisibility,
-        )>,
-    >,
+    uinode_query: Extract<Query<(&Node, &GlobalTransform, &TouchStick<S>, &ViewVisibility)>>,
     knob_ui_query: Extract<Query<(Entity, &Parent), With<TouchStickUiKnob>>>,
     outline_ui_query: Extract<Query<(Entity, &Parent), With<TouchStickUiOutline>>>,
 ) {
     for (knob_entity, knob_parent) in &knob_ui_query {
-        if let Ok((uinode, global_transform, stick, visibility)) =
-            uinode_query.get(**knob_parent)
-        {
+        if let Ok((uinode, global_transform, stick, visibility)) = uinode_query.get(**knob_parent) {
             if visibility.get() && uinode.size().x != 0. && uinode.size().y != 0. {
                 let radius = uinode.size().x / 2.;
                 let axis_value = stick.value;

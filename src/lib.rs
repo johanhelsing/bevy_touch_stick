@@ -54,9 +54,7 @@ mod ui;
 pub mod prelude {
     #[cfg(feature = "gamepad_mapping")]
     pub use crate::TouchStickGamepadMapping;
-    pub use crate::{
-        TouchStick, TouchStickPlugin, TouchStickType, TouchStickUiBundle,
-    };
+    pub use crate::{TouchStick, TouchStickPlugin, TouchStickType, TouchStickUiBundle};
 }
 
 #[cfg(feature = "gamepad_mapping")]
@@ -66,10 +64,7 @@ pub use crate::gamepad::TouchStickGamepadMapping;
 
 pub use crate::{
     behavior::TouchStickType,
-    ui::{
-        TouchStickInteractionArea, TouchStickUiBundle, TouchStickUiKnob,
-        TouchStickUiOutline,
-    },
+    ui::{TouchStickInteractionArea, TouchStickUiBundle, TouchStickUiKnob, TouchStickUiOutline},
 };
 use crate::{
     input::{

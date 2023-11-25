@@ -1,6 +1,4 @@
-use crate::{
-    StickIdType, TouchStick, TouchStickEvent, TouchStickEventType, TouchStickType,
-};
+use crate::{StickIdType, TouchStick, TouchStickEvent, TouchStickEventType, TouchStickType};
 use bevy::{
     input::{mouse::MouseButtonInput, touch::TouchPhase, ButtonState},
     prelude::*,
@@ -22,7 +20,7 @@ pub(crate) fn update_sticks_from_drag_events<S: StickIdType>(
 ) {
     let input_events = drag_events.read().collect::<Vec<&DragEvent>>();
 
-    for mut stick in sticks.iter_mut()  {
+    for mut stick in &mut sticks {
         for event in &input_events {
             match event {
                 DragEvent::Start { id, position } => {
