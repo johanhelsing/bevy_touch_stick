@@ -3,28 +3,42 @@
 //! see the examples for more detailed usage
 //!
 //! ## Example
-//!```no_run
-// # use bevy::prelude::*;
-// use bevy_touch_stick::prelude::*
-//! commands.spawn((
-//!     BackgroundColor(Color::BLUE),
-//!     TouchStickUiBundle {
-//!         stick: TouchStick {
-//!             id: Stick::Right,
-//!             stick_type: TouchStickType::Dynamic,
-//!             ..default()
-//!         },
-//!         style: Style {
-//!             width: Val::Px(150.),
-//!             height: Val::Px(150.),
-//!             position_type: PositionType::Absolute,
-//!             right: Val::Px(35.),
-//!             bottom: Val::Percent(15.),
-//!             ..default()
-//!         },
-//!         ..default()
-//!     }
-//! ));
+//!```rust
+//! use bevy::prelude::*;
+//! use bevy_touch_stick::prelude::*;
+//!
+//!#[derive(Default, Reflect, Hash, Clone, PartialEq, Eq)]
+//! enum Stick {
+//!     #[default]
+//!     Left,
+//!     Right,
+//! }
+//!
+//! fn main () {
+//!     App::new().add_systems(Startup, spawn_joystick).run()
+//! }
+//!
+//!  fn spawn_joystick(mut commands: Commands) {
+//!     commands.spawn((
+//!          BackgroundColor(Color::BLUE),
+//!          TouchStickUiBundle {
+//!              stick: TouchStick {
+//!                  id: Stick::Right,
+//!                  stick_type: TouchStickType::Dynamic,
+//!                  ..default()
+//!              },
+//!              style: Style {
+//!                  width: Val::Px(150.),
+//!                  height: Val::Px(150.),
+//!                  position_type: PositionType::Absolute,
+//!                  right: Val::Px(35.),
+//!                  bottom: Val::Percent(15.),
+//!                  ..default()
+//!              },
+//!              ..default()
+//!          }
+//!      ));
+//! }
 //!```
 //!
 use bevy::{prelude::*, reflect::TypePath, ui::UiSystem};
