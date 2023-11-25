@@ -55,7 +55,7 @@ pub mod prelude {
     #[cfg(feature = "gamepad_mapping")]
     pub use crate::TouchStickGamepadMapping;
     pub use crate::{
-        TouchStick, TouchStickPlugin, TouchStickType, TouchStickUi, TouchStickUiBundle,
+        TouchStick, TouchStickPlugin, TouchStickType, TouchStickUiBundle,
     };
 }
 
@@ -67,7 +67,7 @@ pub use crate::gamepad::TouchStickGamepadMapping;
 pub use crate::{
     behavior::TouchStickType,
     ui::{
-        TouchStickInteractionArea, TouchStickUi, TouchStickUiBundle, TouchStickUiKnob,
+        TouchStickInteractionArea, TouchStickUiBundle, TouchStickUiKnob,
         TouchStickUiOutline,
     },
 };
@@ -151,7 +151,6 @@ impl<S> Default for TouchStickPlugin<S> {
 impl<S: StickIdType> Plugin for TouchStickPlugin<S> {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.register_type::<TouchStickInteractionArea>()
-            .register_type::<TouchStickUi<S>>()
             .register_type::<TouchStick<S>>()
             .register_type::<TouchStickType>()
             .register_type::<TouchStickEventType>()

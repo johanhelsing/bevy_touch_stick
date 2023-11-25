@@ -4,7 +4,7 @@ use bevy::{
     render::{Extract, RenderApp},
     ui::{ContentSize, ExtractedUiNodes, FocusPolicy, RelativeCursorPosition, RenderUiSystem},
 };
-use std::{hash::Hash, marker::PhantomData};
+use std::marker::PhantomData;
 
 /// Marker component for a `bevy_ui` Node area where sticks can be interacted with.
 #[derive(Component, Copy, Clone, Debug, Default, Reflect)]
@@ -27,8 +27,6 @@ pub struct TouchStickUiOutline;
 pub struct TouchStickUiBundle<S: StickIdType> {
     /// Data describing the [`TouchStick`] state
     pub stick: TouchStick<S>,
-    /// Marker component
-    pub stick_node: TouchStickUi<S>,
     /// Where this node will accept touch input
     pub interaction_area: TouchStickInteractionArea,
     /// Describes the size of the node
@@ -53,14 +51,6 @@ pub struct TouchStickUiBundle<S: StickIdType> {
     pub z_index: ZIndex,
     /// Cursor position relative too the [`TouchStick`] in normalized logical pixels
     pub cursor_pos: RelativeCursorPosition,
-}
-
-/// marker component containing `[StickIdType`]
-#[derive(Component, Clone, Debug, Default, Reflect)]
-#[reflect(Component, Default)]
-pub struct TouchStickUi<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static> {
-    /// Identifier for [`TouchStick`]
-    pub id: S,
 }
 
 pub(crate) struct TouchStickUiPlugin<S: StickIdType> {
@@ -93,7 +83,6 @@ pub(crate) fn patch_stick_node<S: StickIdType>(
         Query<(
             &Node,
             &GlobalTransform,
-            &TouchStickUi<S>,
             &TouchStick<S>,
             &ViewVisibility,
         )>,
@@ -102,7 +91,7 @@ pub(crate) fn patch_stick_node<S: StickIdType>(
     outline_ui_query: Extract<Query<(Entity, &Parent), With<TouchStickUiOutline>>>,
 ) {
     for (knob_entity, knob_parent) in &knob_ui_query {
-        if let Ok((uinode, global_transform, _stick_ui, stick, visibility)) =
+        if let Ok((uinode, global_transform, stick, visibility)) =
             uinode_query.get(**knob_parent)
         {
             if visibility.get() && uinode.size().x != 0. && uinode.size().y != 0. {
@@ -125,7 +114,7 @@ pub(crate) fn patch_stick_node<S: StickIdType>(
     }
 
     for (outline_entity, outline_parent) in &outline_ui_query {
-        if let Ok((uinode, global_transform, _stick_ui, stick, visibility)) =
+        if let Ok((uinode, global_transform, stick, visibility)) =
             uinode_query.get(**outline_parent)
         {
             if visibility.get() && uinode.size().x != 0. && uinode.size().y != 0. {

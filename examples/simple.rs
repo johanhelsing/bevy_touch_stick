@@ -47,7 +47,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // spawn a touch stick
     commands
         .spawn(TouchStickUiBundle::<MyStick> {
-            stick_node: TouchStickUi { id: MyStick },
             style: Style {
                 width: Val::Px(150.),
                 height: Val::Px(150.),

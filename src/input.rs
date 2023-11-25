@@ -1,5 +1,5 @@
 use crate::{
-    StickIdType, TouchStick, TouchStickEvent, TouchStickEventType, TouchStickType, TouchStickUi,
+    StickIdType, TouchStick, TouchStickEvent, TouchStickEventType, TouchStickType,
 };
 use bevy::{
     input::{mouse::MouseButtonInput, touch::TouchPhase, ButtonState},
@@ -18,11 +18,11 @@ pub(crate) enum DragEvent {
 pub(crate) fn update_sticks_from_drag_events<S: StickIdType>(
     mut drag_events: EventReader<DragEvent>,
     mut stick_events: EventWriter<TouchStickEvent<S>>,
-    mut sticks: Query<(&TouchStickUi<S>, &mut TouchStick<S>)>,
+    mut sticks: Query<&mut TouchStick<S>>,
 ) {
     let input_events = drag_events.read().collect::<Vec<&DragEvent>>();
 
-    for (node, mut stick) in sticks.iter_mut() {
+    for mut stick in sticks.iter_mut()  {
         for event in &input_events {
             match event {
                 DragEvent::Start { id, position } => {
@@ -62,7 +62,7 @@ pub(crate) fn update_sticks_from_drag_events<S: StickIdType>(
                     stick.drag_position = Vec2::ZERO;
                     stick.value = Vec2::ZERO;
                     stick_events.send(TouchStickEvent {
-                        id: node.id.clone(),
+                        id: stick.id.clone(),
                         event: TouchStickEventType::Release,
                         value: Vec2::ZERO,
                     });
@@ -76,7 +76,7 @@ pub(crate) fn update_sticks_from_drag_events<S: StickIdType>(
             && stick.drag_id.is_some()
         {
             stick_events.send(TouchStickEvent {
-                id: node.id.clone(),
+                id: stick.id.clone(),
                 event: TouchStickEventType::Drag,
                 value: stick.value,
             });
