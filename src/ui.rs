@@ -4,9 +4,9 @@ use bevy::{
     render::{Extract, RenderApp},
     ui::{ContentSize, ExtractedUiNodes, FocusPolicy, RelativeCursorPosition, RenderUiSystem},
 };
-use std::{hash::Hash, marker::PhantomData};
+use std::marker::PhantomData;
 
-/// Marker component for a bevy_ui Node area where sticks can be interacted with.
+/// Marker component for a `bevy_ui` Node area where sticks can be interacted with.
 #[derive(Component, Copy, Clone, Debug, Default, Reflect)]
 #[reflect(Component, Default)]
 pub struct TouchStickInteractionArea;
@@ -22,10 +22,12 @@ pub struct TouchStickUiKnob;
 pub struct TouchStickUiOutline;
 
 // TODO: default returns a broken bundle, should remove or fix
+/// Touch stick ui bundle for easy spawning
 #[derive(Bundle, Debug, Default)]
 pub struct TouchStickUiBundle<S: StickIdType> {
+    /// Data describing the [`TouchStick`] state
     pub stick: TouchStick<S>,
-    pub stick_node: TouchStickUi<S>,
+    /// Where this node will accept touch input
     pub interaction_area: TouchStickInteractionArea,
     /// Describes the size of the node
     pub node: Node,
@@ -47,15 +49,8 @@ pub struct TouchStickUiBundle<S: StickIdType> {
     pub view_visibility: ViewVisibility,
     /// Indicates the depth at which the node should appear in the UI
     pub z_index: ZIndex,
+    /// Cursor position relative to the [`TouchStick`] in normalized logical pixels
     pub cursor_pos: RelativeCursorPosition,
-}
-
-/// bevy ui config for a stick
-#[derive(Component, Clone, Debug, Default, Reflect)]
-#[reflect(Component, Default)]
-pub struct TouchStickUi<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static> {
-    /// Identifier of joystick
-    pub id: S,
 }
 
 pub(crate) struct TouchStickUiPlugin<S: StickIdType> {
@@ -70,9 +65,8 @@ impl<S: StickIdType> Default for TouchStickUiPlugin<S> {
 
 impl<S: StickIdType> Plugin for TouchStickUiPlugin<S> {
     fn build(&self, app: &mut App) {
-        let render_app = match app.get_sub_app_mut(RenderApp) {
-            Ok(render_app) => render_app,
-            Err(_) => return,
+        let Ok(render_app) = app.get_sub_app_mut(RenderApp) else {
+            return;
         };
         render_app.add_systems(
             ExtractSchedule,
@@ -84,22 +78,12 @@ impl<S: StickIdType> Plugin for TouchStickUiPlugin<S> {
 #[allow(clippy::type_complexity)]
 pub(crate) fn patch_stick_node<S: StickIdType>(
     mut extracted_uinodes: ResMut<ExtractedUiNodes>,
-    uinode_query: Extract<
-        Query<(
-            &Node,
-            &GlobalTransform,
-            &TouchStickUi<S>,
-            &TouchStick<S>,
-            &ViewVisibility,
-        )>,
-    >,
+    uinode_query: Extract<Query<(&Node, &GlobalTransform, &TouchStick<S>, &ViewVisibility)>>,
     knob_ui_query: Extract<Query<(Entity, &Parent), With<TouchStickUiKnob>>>,
     outline_ui_query: Extract<Query<(Entity, &Parent), With<TouchStickUiOutline>>>,
 ) {
     for (knob_entity, knob_parent) in &knob_ui_query {
-        if let Ok((uinode, global_transform, _stick_ui, stick, visibility)) =
-            uinode_query.get(**knob_parent)
-        {
+        if let Ok((uinode, global_transform, stick, visibility)) = uinode_query.get(**knob_parent) {
             if visibility.get() && uinode.size().x != 0. && uinode.size().y != 0. {
                 let radius = uinode.size().x / 2.;
                 let axis_value = stick.value;
@@ -120,7 +104,7 @@ pub(crate) fn patch_stick_node<S: StickIdType>(
     }
 
     for (outline_entity, outline_parent) in &outline_ui_query {
-        if let Ok((uinode, global_transform, _stick_ui, stick, visibility)) =
+        if let Ok((uinode, global_transform, stick, visibility)) =
             uinode_query.get(**outline_parent)
         {
             if visibility.get() && uinode.size().x != 0. && uinode.size().y != 0. {

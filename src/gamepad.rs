@@ -10,6 +10,9 @@ use bevy::{
 
 use crate::{StickIdType, TouchStick};
 
+/// Plugin that makes [`TouchStick`]s pretend to be regular bevy gamepads
+///
+/// Add [`GamepadAxisMapping`] to a [`TouchStick`] to make it show up as a bevy gamepad.
 pub(crate) struct GamepadMappingPlugin<S: StickIdType> {
     _marker: PhantomData<S>,
 }
@@ -20,9 +23,6 @@ impl<S: StickIdType> Default for GamepadMappingPlugin<S> {
     }
 }
 
-/// Plugin that makes TouchSticks pretend to be regular bevy gamepads
-///
-/// Add [`GamepadAxisMapping`] to a [`TouchStick`] to make it show up as a bevy gamepad.
 impl<S: StickIdType> Plugin for GamepadMappingPlugin<S> {
     fn build(&self, app: &mut App) {
         app.add_systems(
@@ -33,19 +33,24 @@ impl<S: StickIdType> Plugin for GamepadMappingPlugin<S> {
 }
 
 /// HACK: chosen at random, we're betting on no collisions with gilrs gamepads
-/// needs to be below u32::MAX to work on 32bit platforms.
+/// needs to be below `u32::MAX` to work on 32bit platforms.
 const TOUCH_GAMEPAD_ID: usize = 3407632091;
 
 const TOUCH_GAMEPAD: Gamepad = Gamepad {
     id: TOUCH_GAMEPAD_ID,
 };
 
+/// Mapping of a [`TouchStick`] to bevy gamepad axes.
+///
+/// Adding this component to a [`TouchStick`] will create an emulated gamepad through `bevy_input`.
 #[derive(Component, Reflect, Clone, Copy, Debug, Eq, PartialEq)]
 pub struct TouchStickGamepadMapping(pub GamepadAxisType, pub GamepadAxisType);
 
 impl TouchStickGamepadMapping {
+    /// Defines default left stick mapping
     pub const LEFT_STICK: Self =
         TouchStickGamepadMapping(GamepadAxisType::LeftStickX, GamepadAxisType::LeftStickY);
+    /// Defines default right stick mapping
     pub const RIGHT_STICK: Self =
         TouchStickGamepadMapping(GamepadAxisType::RightStickX, GamepadAxisType::RightStickY);
 }
