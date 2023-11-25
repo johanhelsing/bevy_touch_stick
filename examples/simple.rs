@@ -47,18 +47,17 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // spawn a touch stick
     commands
         .spawn(TouchStickUiBundle::<MyStick> {
-            stick_node: TouchStickUi { id: MyStick },
             style: Style {
                 width: Val::Px(150.),
                 height: Val::Px(150.),
-                align_self: AlignSelf::Center,
                 position_type: PositionType::Absolute,
                 margin: UiRect {
                     left: Val::Auto,
                     right: Val::Auto,
+                    top: Val::Auto,
+                    bottom: Val::Vh(15.),
                     ..default()
                 },
-                bottom: Val::Vw(15.),
                 ..default()
             },
             ..default()
@@ -73,7 +72,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         height: Val::Px(75.),
                         ..default()
                     },
-                    background_color: Color::ORANGE.with_a(0.3).into(),
                     ..default()
                 },
             ));
@@ -86,7 +84,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         height: Val::Px(150.),
                         ..default()
                     },
-                    background_color: Color::ORANGE.with_a(0.3).into(),
                     ..default()
                 },
             ));

@@ -3,23 +3,25 @@
 Virtual touch screen analog joysticks for the [Bevy](https://bevyengine.org/)
 game engine.
 
-Only two-axis sticks are supported.
-
 ## Goals
 
 - [x] Support mouse and touch
-- [ ] Multiple joysticks on screen (for e.g. twin stick)
+- [x] Multiple joysticks on screen (for e.g. twin stick)
 - [x] Emulate a regular bevy gamepad
 - [x] Minimal dependencies (including features)
 - [ ] Simple stupid implementation
 - [ ] Modular rendering
 - [ ] No asset dependencies
 
+Only two-axis sticks are supported.
+
+If you need single-axis sticks, use [SergioRibera/virtual_joystick](https://github.com/SergioRibera/virtual_joystick) instead.
+
 ## Examples
 
-<!-- - [`leafwing`](./examples/leafwing.rs) (recommended): Shows usage with [`leafwing-input-manager`](https://github.com/Leafwing-Studios/leafwing-input-manager) -->
+- [`leafwing`](./examples/leafwing.rs) (recommended): Shows usage with [`leafwing-input-manager`](https://github.com/Leafwing-Studios/leafwing-input-manager)
 - [`simple`](./examples/simple.rs)
-<!-- - [`multiple`](./examples/multiple.rs) -->
+- [`multiple`](./examples/multiple.rs)
 
 ## Usage
 
