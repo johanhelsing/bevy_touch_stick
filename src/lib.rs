@@ -36,7 +36,7 @@ mod gamepad;
 mod input;
 mod ui;
 
-/// commonly used exports from this crate
+/// Commonly used exports from this crate
 pub mod prelude {
     #[cfg(feature = "gamepad_mapping")]
     pub use crate::TouchStickGamepadMapping;
@@ -65,17 +65,17 @@ use crate::{
     ui::TouchStickUiPlugin,
 };
 
-/// pure data, independent of bevy_ui
+/// Pure data, independent of `bevy_ui`
 #[derive(Component, Clone, Debug, Reflect)]
 #[reflect(Component, Default)]
 pub struct TouchStick<S: StickIdType> {
     /// Type used for identifying this [`TouchStick`]
     pub id: S,
-    /// what drag event sequence is currently affecting this `TouchStick`
+    /// What drag event sequence is currently affecting this [`TouchStick`]
     pub drag_id: Option<u64>,
-    /// values smaller than this will not send `TouchStickEvent`
+    /// Axes values less than `dead_zone` will not send [`TouchStickEvent`]s
     pub dead_zone: f32,
-    /// last drag positon of touchstick. only applies too `TouchStickType::Dynamic`
+    /// Last `drag_position` of [`TouchStick`] only applies too [`TouchStickType::Dynamic`]
     ///
     /// `Vec2::ZERO` if node is released
     pub base_position: Vec2,
@@ -87,7 +87,7 @@ pub struct TouchStick<S: StickIdType> {
     pub value: Vec2,
     /// In input space (y-down)
     pub interactable_zone: Rect,
-    /// Defines the positioning behavior of the `TouchStick`
+    /// Defines the positioning behavior of the [`TouchStick`]
     pub stick_type: TouchStickType,
 }
 
@@ -117,13 +117,13 @@ impl<S: StickIdType> From<S> for TouchStick<S> {
 }
 
 impl<S: StickIdType> TouchStick<S> {
-    /// creates a new `TouchStick` with the given id.
+    /// Creates a new [`TouchStick`] with the given id.
     pub fn new(id: S) -> Self {
         Self { id, ..default() }
     }
 }
 
-/// plugin holding `TouchStick` functionality
+/// Plugin holding [`TouchStick`] functionality
 pub struct TouchStickPlugin<S> {
     _marker: PhantomData<S>,
 }
@@ -163,7 +163,7 @@ impl<S: StickIdType> Plugin for TouchStickPlugin<S> {
     }
 }
 
-/// type definition for TouchStick identifier
+/// Type definition for [`TouchStick`] identifier
 pub trait StickIdType:
     Hash + Sync + Send + Clone + Default + Reflect + FromReflect + TypePath + 'static
 {
@@ -191,23 +191,26 @@ fn map_input_zones_from_ui_nodes<S: StickIdType>(
     }
 }
 
-/// what action the TouchStick is experiencing
+/// What action the [`TouchStick`] is experiencing
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Reflect)]
 #[reflect]
 pub enum TouchStickEventType {
-    /// `TouchStick` was activated
+    /// [`TouchStick`] was activated
     Press,
-    /// `TouchStick` was moved
+    /// [`TouchStick`] was moved
     Drag,
-    /// `TouchStick` was deactivated
+    /// [`TouchStick`] was deactivated
     Release,
 }
 
-/// event sent whenever the touchstick is interacted.
+/// Event sent whenever the [`TouchStick`] is interacted.
 #[derive(Event)]
 pub struct TouchStickEvent<S: StickIdType> {
+    /// Identification for joystick that sent this event
     id: S,
+    /// What interaction did this [`TouchStick`] experience
     event: TouchStickEventType,
+    /// [`TouchStick`]
     value: Vec2,
 }
 

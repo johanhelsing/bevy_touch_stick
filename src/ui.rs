@@ -6,7 +6,7 @@ use bevy::{
 };
 use std::{hash::Hash, marker::PhantomData};
 
-/// Marker component for a bevy_ui Node area where sticks can be interacted with.
+/// Marker component for a `bevy_ui` Node area where sticks can be interacted with.
 #[derive(Component, Copy, Clone, Debug, Default, Reflect)]
 #[reflect(Component, Default)]
 pub struct TouchStickInteractionArea;
@@ -25,11 +25,11 @@ pub struct TouchStickUiOutline;
 /// Touch stick ui bundle for easy spawning
 #[derive(Bundle, Debug, Default)]
 pub struct TouchStickUiBundle<S: StickIdType> {
-    /// data describing the `TouchStick` state
+    /// Data describing the [`TouchStick`] state
     pub stick: TouchStick<S>,
-    /// marker component
+    /// Marker component
     pub stick_node: TouchStickUi<S>,
-    /// where this node will accept touch input
+    /// Where this node will accept touch input
     pub interaction_area: TouchStickInteractionArea,
     /// Describes the size of the node
     pub node: Node,
@@ -51,15 +51,15 @@ pub struct TouchStickUiBundle<S: StickIdType> {
     pub view_visibility: ViewVisibility,
     /// Indicates the depth at which the node should appear in the UI
     pub z_index: ZIndex,
-    /// cursor position relative too the `TouchStick` in normalized logical pixels
+    /// Cursor position relative too the [`TouchStick`] in normalized logical pixels
     pub cursor_pos: RelativeCursorPosition,
 }
 
-/// marker component containing `TouchStickId`
+/// marker component containing `[StickIdType`]
 #[derive(Component, Clone, Debug, Default, Reflect)]
 #[reflect(Component, Default)]
 pub struct TouchStickUi<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + 'static> {
-    /// Identifier for `TouchStick`
+    /// Identifier for [`TouchStick`]
     pub id: S,
 }
 
