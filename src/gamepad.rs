@@ -33,8 +33,8 @@ impl<S: StickIdType> Plugin for GamepadMappingPlugin<S> {
 }
 
 /// HACK: chosen at random, we're betting on no collisions with gilrs gamepads
-/// updated too work on 32bit platforms, NOT `u32::MAX`, a bit less.
-const TOUCH_GAMEPAD_ID: usize = 4264937294;
+/// needs to be below u32::MAX to work on 32bit platforms.
+const TOUCH_GAMEPAD_ID: usize = 3407632091;
 
 const TOUCH_GAMEPAD: Gamepad = Gamepad {
     id: TOUCH_GAMEPAD_ID,

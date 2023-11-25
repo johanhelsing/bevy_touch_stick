@@ -164,6 +164,12 @@ fn get_base_pos<S: StickIdType>(
                 stick.drag_start.extend(0.)
             }
         }
-        TouchStickType::Dynamic => stick.base_position.extend(0.),
+        TouchStickType::Dynamic => {
+            if stick.drag_id.is_none() || stick.base_position == Vec2::ZERO {
+                global_transform.translation()
+            } else {
+                stick.base_position.extend(0.)
+            }
+        }
     }
 }
