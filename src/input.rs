@@ -119,7 +119,7 @@ pub(crate) fn send_drag_events_from_mouse(
     primary_window: Query<&Window, With<PrimaryWindow>>,
 ) {
     let primary_window = primary_window.single();
-    let position = primary_window.cursor_position().unwrap_or(Vec2::ZERO);
+    let position = primary_window.cursor_position();
 
     for mouse_event in mouse_events.read() {
         if mouse_event.button == MouseButton::Left && mouse_event.state == ButtonState::Released {
@@ -127,11 +127,19 @@ pub(crate) fn send_drag_events_from_mouse(
         }
 
         if mouse_event.button == MouseButton::Left && mouse_event.state == ButtonState::Pressed {
-            drag_events.send(DragEvent::Start { id: 0, position });
+            drag_events.send(DragEvent::Start {
+                id: 0,
+                position: position.unwrap_or_default(),
+            });
         }
     }
 
     if mouse_buttons.pressed(MouseButton::Left) {
-        drag_events.send(DragEvent::Drag { id: 0, position });
+        // if the mouse is outside the window, we'll still get pressed state,
+        // but we won't get the position. So in that case, we stop sending drag
+        // events.
+        if let Some(position) = position {
+            drag_events.send(DragEvent::Drag { id: 0, position });
+        }
     }
 }
