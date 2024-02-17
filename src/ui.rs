@@ -85,7 +85,7 @@ pub(crate) fn patch_stick_node<S: StickIdType>(
     for (knob_entity, knob_parent) in &knob_ui_query {
         if let Ok((uinode, global_transform, stick, visibility)) = uinode_query.get(**knob_parent) {
             if visibility.get() && uinode.size().x != 0. && uinode.size().y != 0. {
-                let radius = uinode.size().x / 2.;
+                let radius = stick.radius;
                 let axis_value = stick.value;
                 // ui is y down, so we flip
                 let pos = Vec2::new(axis_value.x, -axis_value.y) * radius;
