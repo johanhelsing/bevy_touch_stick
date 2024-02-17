@@ -38,17 +38,17 @@ pub(crate) fn update_sticks_from_drag_events<S: StickIdType>(
                 }
                 DragEvent::Drag { id, position: pos } if Some(*id) == stick.drag_id => {
                     stick.drag_position = *pos;
-                    let half = stick.interactable_zone.half_size();
+                    let radius = stick.radius;
                     if stick.stick_type == TouchStickType::Dynamic {
                         stick.base_position = *pos;
                         let to_knob = stick.drag_position - stick.drag_start;
                         let distance_to_knob = to_knob.length();
-                        if distance_to_knob > half.x {
-                            let excess_distance = distance_to_knob - half.x;
+                        if distance_to_knob > radius {
+                            let excess_distance = distance_to_knob - radius;
                             stick.drag_start += to_knob.normalize() * excess_distance;
                         }
                     }
-                    let d = (stick.drag_position - stick.drag_start) / half;
+                    let d = (stick.drag_position - stick.drag_start) / radius;
                     let length = d.length();
                     // input events are y positive down, so we flip it
                     stick.value = Vec2::new(d.x, -d.y) / length.max(1.);

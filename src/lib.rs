@@ -96,6 +96,8 @@ pub struct TouchStick<S: StickIdType> {
     pub value: Vec2,
     /// In input space (y-down)
     pub interactable_zone: Rect,
+    /// In input space, how far to drag before reaching max activation
+    pub radius: f32,
     /// Defines the positioning behavior of the [`TouchStick`]
     pub stick_type: TouchStickType,
 }
@@ -114,6 +116,7 @@ impl<S: StickIdType> Default for TouchStick<S> {
                 min: Vec2::MIN,
                 max: Vec2::MAX,
             },
+            radius: 75.,
             stick_type: default(),
         }
     }

@@ -52,16 +52,11 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ..default()
             },
             style: Style {
-                width: Val::Px(150.),
-                height: Val::Px(150.),
+                top: Val::Px(0.),
+                bottom: Val::Px(0.),
+                right: Val::Px(0.),
+                left: Val::Px(0.),
                 position_type: PositionType::Absolute,
-                margin: UiRect {
-                    left: Val::Auto,
-                    right: Val::Auto,
-                    top: Val::Auto,
-                    bottom: Val::Vh(15.),
-                    ..default()
-                },
                 ..default()
             },
             ..default()
