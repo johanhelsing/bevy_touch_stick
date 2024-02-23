@@ -33,6 +33,7 @@ The `main` branch targets the latest bevy release.
 
 |bevy|bevy_touch_stick|
 |----|----------------|
+|0.13|main            |
 |0.12|0.1, main       |
 
 ## License

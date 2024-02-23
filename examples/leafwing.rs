@@ -56,8 +56,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 action_state: ActionState::default(),
                 // Describes how to convert from player inputs into those actions
                 input_map: InputMap::default()
-                    .insert(DualAxis::left_stick(), Action::Move)
-                    .insert(DualAxis::right_stick(), Action::Look)
+                    .insert(Action::Move, DualAxis::left_stick())
+                    .insert(Action::Look, DualAxis::right_stick())
                     .build(),
             },
             SpriteBundle {
@@ -199,8 +199,8 @@ fn move_player(
 ) {
     let (mut player_transform, action_state, player) = players.single_mut();
 
-    if action_state.pressed(Action::Move) {
-        let axis_value = action_state.clamped_axis_pair(Action::Move).unwrap().xy();
+    if action_state.pressed(&Action::Move) {
+        let axis_value = action_state.clamped_axis_pair(&Action::Move).unwrap().xy();
 
         info!("moving: {axis_value}");
 
@@ -208,8 +208,8 @@ fn move_player(
         player_transform.translation += move_delta.extend(0.);
     }
 
-    if action_state.pressed(Action::Look) {
-        let axis_value = action_state.clamped_axis_pair(Action::Look).unwrap().xy();
+    if action_state.pressed(&Action::Look) {
+        let axis_value = action_state.clamped_axis_pair(&Action::Look).unwrap().xy();
 
         if axis_value != Vec2::ZERO {
             let dir = Vec2::angle_between(Vec2::X, axis_value.normalize());
