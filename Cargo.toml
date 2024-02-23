@@ -1,9 +1,10 @@
 [package]
+authors = ["Johan Helsing <johanhelsing@gmail.com>"]
 name = "bevy_touch_stick"
 version = "0.1.0"
 edition = "2021"
 categories = ["game-engines", "input", "gui"]
-description = "Bevy virtual Joystick for mobile games"
+description = "Bevy virtual touch joystick for mobile games"
 exclude = ["default_assets/", ".github/"]
 keywords = ["game", "ui", "gamedev", "bevy", "input"]
 license = "MIT OR Apache-2.0"
