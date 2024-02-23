@@ -1,7 +1,7 @@
 [package]
 authors = ["Johan Helsing <johanhelsing@gmail.com>"]
 name = "bevy_touch_stick"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 categories = ["game-engines", "input", "gui"]
 description = "Bevy virtual touch joystick for mobile games"
