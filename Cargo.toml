@@ -30,7 +30,7 @@ bevy = { version = "0.13", default-features = false, features = [
     "bevy_winit",
     "bevy_gilrs",
     "png",
-    "wayland",
+    "x11",
     "webgl2"
 ] }
 bevy-inspector-egui = {version = "0.23", default-features = false}
