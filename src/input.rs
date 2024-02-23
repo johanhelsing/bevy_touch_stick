@@ -113,7 +113,7 @@ pub(crate) fn send_drag_events_from_touch(
 }
 
 pub(crate) fn send_drag_events_from_mouse(
-    mouse_buttons: Res<Input<MouseButton>>,
+    mouse_buttons: Res<ButtonInput<MouseButton>>,
     mut mouse_events: EventReader<MouseButtonInput>,
     mut drag_events: EventWriter<DragEvent>,
     primary_window: Query<&Window, With<PrimaryWindow>>,
