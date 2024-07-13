@@ -41,7 +41,11 @@
 //! }
 //!```
 //!
-use bevy::{prelude::*, reflect::TypePath, ui::UiSystem};
+use bevy::{
+    prelude::*,
+    reflect::{GetTypeRegistration, TypePath},
+    ui::UiSystem,
+};
 use std::{hash::Hash, marker::PhantomData};
 
 mod behavior;
@@ -176,12 +180,31 @@ impl<S: StickIdType> Plugin for TouchStickPlugin<S> {
 
 /// Type definition for [`TouchStick`] identifier
 pub trait StickIdType:
-    Hash + Sync + Send + Clone + Default + Reflect + FromReflect + TypePath + 'static
+    Hash
+    + Sync
+    + Send
+    + Clone
+    + Default
+    + Reflect
+    + FromReflect
+    + TypePath
+    + GetTypeRegistration
+    + 'static
 {
 }
 
-impl<S: Hash + Sync + Send + Clone + Default + Reflect + FromReflect + TypePath + 'static>
-    StickIdType for S
+impl<
+        S: Hash
+            + Sync
+            + Send
+            + Clone
+            + Default
+            + Reflect
+            + FromReflect
+            + TypePath
+            + GetTypeRegistration
+            + 'static,
+    > StickIdType for S
 {
 }
 

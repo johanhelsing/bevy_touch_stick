@@ -17,7 +17,7 @@ serde = ["dep:serde"]
 gamepad_mapping = []
 
 [dependencies]
-bevy = { version = "0.13", default-features = false, features = [
+bevy = { version = "0.14", default-features = false, features = [
     "bevy_render",
     "bevy_ui"
 ] }
@@ -27,15 +27,17 @@ serde = { version = "^1", optional = true }
 serde = { version = "^1", features = ["derive"], optional = true }
 
 [dev-dependencies]
-bevy = { version = "0.13", default-features = false, features = [
+bevy = { version = "0.14", default-features = false, features = [
     "bevy_winit",
     "bevy_gilrs",
     "png",
     "x11",
     "webgl2"
 ] }
-bevy-inspector-egui = {version = "0.23", default-features = false}
-leafwing-input-manager = "0.13"
+bevy-inspector-egui = { version = "0.25", default-features = false, features = [
+    "bevy_render"
+] }
+leafwing-input-manager = "0.14"
 
 [[example]]
 name = "leafwing"

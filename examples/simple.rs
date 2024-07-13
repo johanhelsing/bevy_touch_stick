@@ -36,7 +36,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         Player { max_speed: 50. },
         SpriteBundle {
             sprite: Sprite {
-                color: Color::ORANGE,
+                color: bevy::color::palettes::css::ORANGE.into(),
                 custom_size: Some(Vec2::splat(50.)),
                 ..default()
             },

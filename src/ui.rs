@@ -65,12 +65,12 @@ impl<S: StickIdType> Default for TouchStickUiPlugin<S> {
 
 impl<S: StickIdType> Plugin for TouchStickUiPlugin<S> {
     fn build(&self, app: &mut App) {
-        let Ok(render_app) = app.get_sub_app_mut(RenderApp) else {
+        let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
             return;
         };
         render_app.add_systems(
             ExtractSchedule,
-            patch_stick_node::<S>.after(RenderUiSystem::ExtractNode),
+            patch_stick_node::<S>.after(RenderUiSystem::ExtractBackgrounds),
         );
     }
 }
