@@ -72,8 +72,11 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ImageBundle {
                     image: asset_server.load("knob.png").into(),
                     style: Style {
+                        // REQUIRED style attributes
                         width: Val::Px(75.),
                         height: Val::Px(75.),
+                        position_type: PositionType::Absolute, // knob must be positioned absolutely
+                        margin: UiRect::all(Val::Auto), // margin must be set too Val::Auto or the knob wont be centered correctly
                         ..default()
                     },
                     ..default()
@@ -84,8 +87,11 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ImageBundle {
                     image: asset_server.load("outline.png").into(),
                     style: Style {
+                        // REQUIRED style attributes
                         width: Val::Px(150.),
                         height: Val::Px(150.),
+                        margin: UiRect::all(Val::Auto),
+                        position_type: PositionType::Absolute,
                         ..default()
                     },
                     ..default()

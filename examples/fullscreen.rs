@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{color::palettes::css as colors, prelude::*};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_touch_stick::{prelude::*, TouchStickUiKnob, TouchStickUiOutline};
 
@@ -27,16 +27,20 @@ struct Player {
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(Camera2dBundle {
-        transform: Transform::from_xyz(0., 0., 5.0),
-        ..default()
-    });
+    commands.spawn((
+        Name::new("Camera"),
+        Camera2dBundle {
+            transform: Transform::from_xyz(0., 0., 5.0),
+            ..default()
+        },
+    ));
 
     commands.spawn((
+        Name::new("Player"),
         Player { max_speed: 50. },
         SpriteBundle {
             sprite: Sprite {
-                color: Color::ORANGE,
+                color: colors::ORANGE.into(),
                 custom_size: Some(Vec2::splat(50.)),
                 ..default()
             },
@@ -44,43 +48,69 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
     ));
 
+    // size of outline for touchstick
+    let radius = 250.0;
+    // knob size for touchstick
+    let knob_size = 75.0;
+    let knob_handle: Handle<Image> = asset_server.load("knob.png");
+    let outline_handle: Handle<Image> = asset_server.load("outline.png");
+    // define 2 position elements and then leave the other 2 at Val::Auto,
+    let position = UiRect { left: Val::Px(0.0), right: Val::Auto, top: Val::Auto, bottom: Val::Px(0.0) };
+
+    // TODO: extract below to reuseable function?
     // spawn a touch stick
     commands
-        .spawn(TouchStickUiBundle::<MyStick> {
-            stick: TouchStick::<MyStick> {
-                radius: 75.0,
+        .spawn((
+            Name::new("TouchStick"),
+            TouchStickUiBundle::<MyStick> {
+                stick: TouchStick::<MyStick> {
+                    stick_type: TouchStickType::Fixed,
+                    radius,
+                    ..default()
+                },
+                style: Style {
+                    width: Val::Px(radius),
+                    height: Val::Px(radius),
+                    top: position.top,
+                    bottom: position.bottom,
+                    left: position.left,
+                    right: position.right,
+                    position_type: PositionType::Absolute,
+                    ..default()
+                },
                 ..default()
             },
-            style: Style {
-                top: Val::Px(0.),
-                bottom: Val::Px(0.),
-                right: Val::Px(0.),
-                left: Val::Px(0.),
-                position_type: PositionType::Absolute,
-                ..default()
-            },
-            ..default()
-        })
+        ))
         .with_children(|parent| {
             parent.spawn((
+                Name::new("Knob"),
                 TouchStickUiKnob,
                 ImageBundle {
-                    image: asset_server.load("knob.png").into(),
+                    // background_color: BackgroundColor(colors::ORANGE.into()),
+                    image: knob_handle.into(),
                     style: Style {
-                        width: Val::Px(75.),
-                        height: Val::Px(75.),
+                        // REQUIRED style attributes
+                        position_type: PositionType::Absolute, // knob must be positioned absolutely
+                        margin: UiRect::all(Val::Auto), // margin must be set too Val::Auto or the knob wont be centered correctly
+                        width: Val::Px(knob_size),
+                        height: Val::Px(knob_size),
                         ..default()
                     },
                     ..default()
                 },
             ));
             parent.spawn((
+                Name::new("Outline"),
                 TouchStickUiOutline,
                 ImageBundle {
-                    image: asset_server.load("outline.png").into(),
+                    // background_color: BackgroundColor(colors::PURPLE.into()),
+                    image: outline_handle.into(),
                     style: Style {
-                        width: Val::Px(150.),
-                        height: Val::Px(150.),
+                        // REQUIRED style attributes
+                        margin: UiRect::all(Val::Auto),
+                        position_type: PositionType::Absolute,
+                        width: Val::Px(radius),
+                        height: Val::Px(radius),
                         ..default()
                     },
                     ..default()

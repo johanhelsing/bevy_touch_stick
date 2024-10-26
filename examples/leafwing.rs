@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use bevy::prelude::*;
+use bevy::{color::palettes::css as colors, prelude::*};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_touch_stick::{prelude::*, TouchStickUiKnob, TouchStickUiOutline};
 use leafwing_input_manager::prelude::*;
@@ -15,7 +15,9 @@ enum Stick {
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
 enum Action {
+    #[actionlike(DualAxis)]
     Move,
+    #[actionlike(DualAxis)]
     Look,
 }
 
@@ -47,6 +49,11 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         ..default()
     });
 
+    let mut input_map = InputMap::default();
+    input_map
+        .insert_dual_axis(Action::Move, GamepadStick::LEFT)
+        .insert_dual_axis(Action::Look, GamepadStick::RIGHT);
+
     // spawn a player
     commands
         .spawn((
@@ -55,10 +62,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 // Stores "which actions are currently activated"
                 action_state: ActionState::default(),
                 // Describes how to convert from player inputs into those actions
-                input_map: InputMap::default()
-                    .insert(Action::Move, DualAxis::left_stick())
-                    .insert(Action::Look, DualAxis::right_stick())
-                    .build(),
+                input_map,
             },
             SpriteBundle {
                 transform: Transform {
@@ -66,7 +70,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     ..default()
                 },
                 sprite: Sprite {
-                    color: Color::ORANGE,
+                    color: colors::ORANGE.into(),
                     custom_size: Some(Vec2::new(30., 50.)),
                     ..default()
                 },
@@ -82,7 +86,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     ..default()
                 },
                 sprite: Sprite {
-                    color: Color::ORANGE,
+                    color: colors::ORANGE.into(),
                     custom_size: Some(Vec2::splat(50. / f32::sqrt(2.))),
                     ..default()
                 },
@@ -99,7 +103,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             TouchStickUiBundle {
                 stick: TouchStick {
                     id: Stick::Left,
-                    stick_type: TouchStickType::Fixed,
+                    stick_type: TouchStickType::Dynamic,
                     ..default()
                 },
                 // configure the interactable area through bevy_ui
@@ -120,8 +124,11 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ImageBundle {
                     image: asset_server.load("knob.png").into(),
                     style: Style {
+                        // REQUIRED style attributes
                         width: Val::Px(75.),
                         height: Val::Px(75.),
+                        position_type: PositionType::Absolute, // knob must be positioned absolutely
+                        margin: UiRect::all(Val::Auto), // margin must be set too Val::Auto or the knob wont be centered correctly
                         ..default()
                     },
                     ..default()
@@ -132,8 +139,11 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ImageBundle {
                     image: asset_server.load("outline.png").into(),
                     style: Style {
+                        // REQUIRED style attributes
                         width: Val::Px(150.),
                         height: Val::Px(150.),
+                        margin: UiRect::all(Val::Auto),
+                        position_type: PositionType::Absolute,
                         ..default()
                     },
                     ..default()
@@ -171,8 +181,11 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 ImageBundle {
                     image: asset_server.load("knob.png").into(),
                     style: Style {
+                        // REQUIRED style attributes
                         width: Val::Px(75.),
                         height: Val::Px(75.),
+                        position_type: PositionType::Absolute, // knob must be positioned absolutely
+                        margin: UiRect::all(Val::Auto), // margin must be set too Val::Auto or the knob wont be centered correctly
                         ..default()
                     },
                     ..default()
@@ -181,10 +194,13 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             parent.spawn((
                 TouchStickUiOutline,
                 ImageBundle {
+                    // REQUIRED style attributes
                     image: asset_server.load("outline.png").into(),
                     style: Style {
                         width: Val::Px(150.),
                         height: Val::Px(150.),
+                        position_type: PositionType::Absolute,
+                        margin: UiRect::all(Val::Auto),
                         ..default()
                     },
                     ..default()
@@ -199,8 +215,8 @@ fn move_player(
 ) {
     let (mut player_transform, action_state, player) = players.single_mut();
 
-    if action_state.pressed(&Action::Move) {
-        let axis_value = action_state.clamped_axis_pair(&Action::Move).unwrap().xy();
+    if action_state.clamped_axis_pair(&Action::Move) != Vec2::ZERO {
+        let axis_value = action_state.clamped_axis_pair(&Action::Move).xy();
 
         info!("moving: {axis_value}");
 
@@ -208,8 +224,8 @@ fn move_player(
         player_transform.translation += move_delta.extend(0.);
     }
 
-    if action_state.pressed(&Action::Look) {
-        let axis_value = action_state.clamped_axis_pair(&Action::Look).unwrap().xy();
+    if action_state.clamped_axis_pair(&Action::Look) != Vec2::ZERO{
+        let axis_value = action_state.clamped_axis_pair(&Action::Look).xy();
 
         if axis_value != Vec2::ZERO {
             let dir = Vec2::angle_between(Vec2::X, axis_value.normalize());

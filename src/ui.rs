@@ -1,8 +1,7 @@
 use crate::{StickIdType, TouchStick, TouchStickType};
 use bevy::{
     prelude::*,
-    render::{Extract, RenderApp},
-    ui::{ContentSize, ExtractedUiNodes, FocusPolicy, RelativeCursorPosition, RenderUiSystem},
+    ui::{ContentSize, FocusPolicy, RelativeCursorPosition},
 };
 use std::marker::PhantomData;
 
@@ -25,6 +24,7 @@ pub struct TouchStickUiOutline;
 /// Touch stick ui bundle for easy spawning
 #[derive(Bundle, Debug, Default)]
 pub struct TouchStickUiBundle<S: StickIdType> {
+    pub background_color: BackgroundColor,
     /// Data describing the [`TouchStick`] state
     pub stick: TouchStick<S>,
     /// Where this node will accept touch input
@@ -65,90 +65,109 @@ impl<S: StickIdType> Default for TouchStickUiPlugin<S> {
 
 impl<S: StickIdType> Plugin for TouchStickUiPlugin<S> {
     fn build(&self, app: &mut App) {
-        let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
-            return;
-        };
-        render_app.add_systems(
-            ExtractSchedule,
-            patch_stick_node::<S>.after(RenderUiSystem::ExtractBackgrounds),
+        app.add_systems(
+            Update,
+            patch_stick_node::<S>, // .after(UiSystem::Stack), // .before(RenderUiSystem::ExtractBackgrounds),
         );
     }
 }
 
+// TODO: maybe better as paramter on touchstick?
+const MOVE_PERCENT_RELATIVE: f32 = 0.25_f32;
+
 #[allow(clippy::type_complexity)]
 pub(crate) fn patch_stick_node<S: StickIdType>(
-    mut extracted_uinodes: ResMut<ExtractedUiNodes>,
-    uinode_query: Extract<Query<(&Node, &GlobalTransform, &TouchStick<S>, &ViewVisibility)>>,
-    knob_ui_query: Extract<Query<(Entity, &Parent), With<TouchStickUiKnob>>>,
-    outline_ui_query: Extract<Query<(Entity, &Parent), With<TouchStickUiOutline>>>,
+    uinode_query: Query<
+        (&Node, &TouchStick<S>, &ViewVisibility),
+        (Without<TouchStickUiKnob>, Without<TouchStickUiOutline>),
+    >,
+    mut knob_ui_query: Query<
+        (&Parent, &mut Style),
+        (With<TouchStickUiKnob>, Without<TouchStickUiOutline>),
+    >,
+    mut outline_ui_query: Query<
+        (&Parent, &mut Style),
+        (With<TouchStickUiOutline>, Without<TouchStickUiKnob>),
+    >,
 ) {
-    for (knob_entity, knob_parent) in &knob_ui_query {
-        if let Ok((uinode, global_transform, stick, visibility)) = uinode_query.get(**knob_parent) {
-            if visibility.get() && uinode.size().x != 0. && uinode.size().y != 0. {
-                let radius = stick.radius;
-                let axis_value = stick.value;
-                // ui is y down, so we flip
-                let pos = Vec2::new(axis_value.x, -axis_value.y) * radius;
 
-                let base_pos = get_base_pos(uinode, stick, global_transform);
-                let knob_pos = base_pos + pos.extend(0.);
+    for (knob_parent, mut style) in &mut knob_ui_query {
+        if let Ok((uinode, stick, visibility)) = uinode_query.get(**knob_parent) {
+            if stick.stick_type == TouchStickType::Floating {
+                if stick.value != Vec2::ZERO {
+                    style.display = Display::Flex;
+                    if visibility.get() && uinode.size().x != 0. && uinode.size().y != 0. {
+                        let radius = stick.radius;
+                        let axis_value = stick.value;
+                        // ui is y down, so we flip
+                        let pos = Vec2::new(axis_value.x, axis_value.y) * radius;
 
-                extracted_uinodes
-                    .uinodes
-                    .entry(knob_entity)
-                    .and_modify(|node| {
-                        node.transform = Mat4::from_translation(knob_pos);
-                    });
+                        // transform.translation = pos;
+                        style.left = Val::Px(pos.x);
+                        style.bottom = Val::Px(pos.y);
+                    }
+                } else {
+                    style.display = Display::None;
+                }
+                // show stick
+            } else if stick.stick_type == TouchStickType::Dynamic {
+                style.display = Display::Flex;
+                if visibility.get() && uinode.size().x != 0. && uinode.size().y != 0. {
+                    let radius = stick.radius;
+                    let axis_value = stick.value;
+                    let pos = Vec2::new(axis_value.x, axis_value.y) * radius;
+
+                    // transform.translation = pos;
+                    style.left = Val::Px(pos.x);
+                    style.bottom = Val::Px(pos.y);
+                }
+            } else if stick.stick_type == TouchStickType::Fixed {
+                style.display = Display::Flex;
+                if visibility.get() && uinode.size().x != 0. && uinode.size().y != 0. {
+                    // convert stick value from magnitude too percent
+                    let axis_value = stick
+                        .value
+                        .clamp(Vec2::splat(-0.5), Vec2::splat(0.5))
+                        .clamp_length(0.0, 0.5)
+                        * stick.radius;
+
+                    let pos = Vec2::new(axis_value.x, axis_value.y);
+
+                    // transform.translation = pos;
+                    style.left = Val::Px(pos.x);
+                    style.bottom = Val::Px(pos.y);
+                }
             }
         }
     }
+    
+    for (outline_parent, mut style) in &mut outline_ui_query {
+        if let Ok((uinode, stick, visibility)) = uinode_query.get(**outline_parent) {
+            if stick.stick_type == TouchStickType::Floating {
+                if stick.value != Vec2::ZERO {
+                    style.display = Display::Flex;
+                } else {
+                    style.display = Display::None;
+                }
+                // show stick
+            } else if stick.stick_type == TouchStickType::Dynamic {
+                style.display = Display::Flex;
+                if visibility.get() && uinode.size().x != 0. && uinode.size().y != 0. {
+                    let radius = stick.radius;
 
-    for (outline_entity, outline_parent) in &outline_ui_query {
-        if let Ok((uinode, global_transform, stick, visibility)) =
-            uinode_query.get(**outline_parent)
-        {
-            if visibility.get() && uinode.size().x != 0. && uinode.size().y != 0. {
-                let pos = get_base_pos(uinode, stick, global_transform);
-                extracted_uinodes
-                    .uinodes
-                    .entry(outline_entity)
-                    .and_modify(|node| {
-                        node.transform = Mat4::from_translation(pos);
-                    });
+                    // only offset a small fraction of the knobs value
+                    let axis_value = stick.value * MOVE_PERCENT_RELATIVE;
+                    let pos = axis_value * radius;
+
+                    // transform.translation = pos;
+                    style.left = Val::Px(pos.x);
+                    style.bottom = Val::Px(pos.y);
+                }
+            } else if stick.stick_type == TouchStickType::Fixed {
+                // skip because position should not change
+                style.display = Display::Flex;
             }
         }
     }
 }
 
-fn get_base_pos<S: StickIdType>(
-    uinode: &Node,
-    stick: &TouchStick<S>,
-    global_transform: &GlobalTransform,
-) -> Vec3 {
-    let container_rect = Rect {
-        max: uinode.size(),
-        ..default()
-    };
-
-    match stick.stick_type {
-        TouchStickType::Fixed => global_transform
-            .compute_matrix()
-            .transform_point3((container_rect.center() - (uinode.size() / 2.)).extend(0.)),
-        TouchStickType::Floating => {
-            if stick.drag_id.is_none() {
-                global_transform
-                    .compute_matrix()
-                    .transform_point3((container_rect.center() - (uinode.size() / 2.)).extend(0.))
-            } else {
-                stick.drag_start.extend(0.)
-            }
-        }
-        TouchStickType::Dynamic => {
-            if stick.drag_id.is_none() || stick.base_position == Vec2::ZERO {
-                global_transform.translation()
-            } else {
-                stick.base_position.extend(0.)
-            }
-        }
-    }
-}

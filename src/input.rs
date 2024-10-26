@@ -118,7 +118,10 @@ pub(crate) fn send_drag_events_from_mouse(
     mut drag_events: EventWriter<DragEvent>,
     primary_window: Query<&Window, With<PrimaryWindow>>,
 ) {
-    let primary_window = primary_window.single();
+    let Ok(primary_window) = primary_window.get_single() else {
+        return
+    };
+
     let position = primary_window.cursor_position();
 
     for mouse_event in mouse_events.read() {
